@@ -1,0 +1,4 @@
+rules/
+*.pdf
+__pycache__/
+*:Zone.Identifier
