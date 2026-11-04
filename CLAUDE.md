@@ -32,6 +32,7 @@ Inline `<style>`, then markup, then one `<script>`. Script sections, in order:
      - `feat(h, L, T)` → array of feature strings with level-scaled numbers
      - `traits: [[name, summary] ×6]`, `traitCount` (halfling = 2)
      - `tmod: {traitIndex: (L,T) => ({life,def,stealth,atkR,atkHand,atkLight,atkSling,atkBow,slots,addItem,allowW})}` — numeric trait effects
+     - `uses(h,L,T)` — per-adventure resources for the printed sheet (Rage, Luck, Tricks, prayers…)
      - flags: `food`, `sworn`, `druidPet`, `nomagic`, `artificial`, `nomush`
 2. **Helpers** — dice, `sgn` (uses a real minus sign), `esc`, random names.
 3. **Hero model**
@@ -61,7 +62,7 @@ Graph-paper "printed form filled in pencil" look.
 - Fonts: **Alegreya** for printed labels, **Kalam** for handwritten values.
 - Color tokens on `:root` with a dark set under `@media (prefers-color-scheme: dark)` and `[data-theme]`: `--paper --grid --grid-strong --ink --pencil --soft --red --blue --card --line --ok --warn`. Red pencil is used for dice, gold and attack numbers.
 - Dice render as pip faces (`.die`) with a short tumble animation, disabled under `prefers-reduced-motion`.
-- Keep the print stylesheet working (sheets print two per row; controls hidden).
+- **Print** renders `#printSheet` instead of the app: a one-page US Letter copy of the 4AD party sheet form (`rules/4AD_Party_Sheet_Letter.pdf`, gitignored), filled in by `renderPrint()` on `beforeprint`. Labels in Helvetica/Arial, values in Kalam. Per-adventure resources come from each class’s `uses(h,L,T)` → `[name, uses]` (≤3 → boxes, else a number); “Once per …” traits are detected from their summary text. Overflow from fixed lines goes into Conditions/Notes. The smoke test fails if any class at L1/5/20 overflows a card or the print spills onto a second page.
 
 ## Hosting
 - GitHub Pages from `main` at https://4ad.macondo.info/ (`CNAME` file; DNS CNAME `4ad` → `juancasa.github.io` at domain.com). Don’t delete `CNAME`. Pushing to `main` deploys.

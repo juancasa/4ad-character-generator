@@ -69,6 +69,20 @@ def main():
         assert pg.evaluate("curLife(party[1])") == 0
         pg.click('#copyMd')
 
+        # printed party sheet: every class at L1/L5/L20 renders, no card overflows, one Letter page
+        over = pg.evaluate('''(()=>{ const bad=[]; const keep=party;
+          for(const id of CLASSES.map(c=>c.id)) for(const L of [1,5,20]){
+            party=[0,1,2,3].map(()=>{const h=newHero(id); h.L=L; fillSpells(h,true); return h;});
+            renderPrint(); const ps=document.getElementById('printSheet'); ps.style.display='flex';
+            ps.querySelectorAll('.ps-body').forEach(b=>{ if(b.scrollHeight>b.clientHeight+1) bad.push(id+' L'+L); });
+            ps.style.display=''; }
+          party=keep; return bad; })()''')
+        assert not over, over
+        pg.emulate_media(media='print')
+        pdf = pg.pdf(prefer_css_page_size=True, print_background=True)
+        assert pdf.count(b'/Type /Page') - pdf.count(b'/Type /Pages') == 1, 'print should be one page'
+        pg.emulate_media(media='screen')
+
         # JSON export -> import round trip
         before = pg.evaluate("JSON.stringify(party.map(h=>[h.cls,h.name,h.L,h.gold,h.bought,h.hp,h.madness,h.clues,h.spells,h.picks||null]))")
         with pg.expect_download() as dl: pg.click('#exportJson')
