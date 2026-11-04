@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>4AD Party Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,600;0,800;1,400&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EEF3F2; --grid:#D3E1E4; --grid-strong:#B9CFD5;
+  --ink:#22262B; --pencil:#4B515A; --soft:#6E757F;
+  --red:#A3302A; --blue:#2F5F80; --card:#F8FBFA; --line:#9DB5BF;
+  --ok:#2F6B45; --warn:#A3302A;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#171B1E; --grid:#222B31; --grid-strong:#2C3840;
+    --ink:#E7EAE8; --pencil:#BCC2C8; --soft:#8E969F;
+    --red:#E3837A; --blue:#8DB6D2; --card:#1D2327; --line:#3B4C56;
+    --ok:#7CC49A; --warn:#E3837A;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#171B1E; --grid:#222B31; --grid-strong:#2C3840;
+  --ink:#E7EAE8; --pencil:#BCC2C8; --soft:#8E969F;
+  --red:#E3837A; --blue:#8DB6D2; --card:#1D2327; --line:#3B4C56;
+  --ok:#7CC49A; --warn:#E3837A;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0; min-height:100%;
+  font-family:"Alegreya", Georgia, "Times New Roman", serif;
+  font-size:17px; line-height:1.45; color:var(--ink);
+  background-color:var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:22px 22px;
+}
+.hand{font-family:"Kalam", "Comic Sans MS", cursive; color:var(--pencil)}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+.wrap{max-width:1240px;margin:0 auto;padding:28px 20px 60px}
+header{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
+h1{
+  margin:0;font-weight:800;font-size:clamp(30px,4.4vw,46px);line-height:1.02;letter-spacing:-.01em;
+}
+h1 small{display:block;font-family:"Kalam",cursive;font-weight:400;font-size:.42em;color:var(--red);letter-spacing:0;transform:rotate(-1.2deg);transform-origin:left;margin-top:6px}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{
+  border:1.5px solid var(--ink);background:var(--card);padding:7px 14px;border-radius:3px;cursor:pointer;
+  font-weight:600;font-size:15px;
+}
+.btn:hover{background:var(--grid)}
+.btn.primary{background:var(--ink);color:var(--paper)}
+.btn.primary:hover{opacity:.88}
+.check{display:flex;gap:6px;align-items:center;font-size:15px;padding:0 6px;cursor:pointer}
+
+.partycheck{
+  display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;
+  border-top:2px solid var(--ink);border-bottom:1px solid var(--line);
+  padding:8px 2px;margin-bottom:22px;font-size:15px;
+}
+.partycheck strong{font-weight:800}
+.role{white-space:nowrap}
+.role .mark{font-family:"Kalam",cursive;font-weight:700;margin-right:3px}
+.role.yes .mark{color:var(--ok)} .role.no .mark{color:var(--warn)}
+.role.no{color:var(--soft)}
+.warning{color:var(--warn);font-style:italic}
+
+.sheets{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:22px}
+.sheet{
+  background:var(--card);border:1.5px solid var(--ink);border-radius:2px;
+  padding:16px 18px 18px;position:relative;
+  box-shadow:4px 4px 0 var(--grid-strong);
+}
+.sheet-head{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:end;border-bottom:1.5px solid var(--ink);padding-bottom:8px;margin-bottom:10px}
+.namebox{display:flex;align-items:baseline;gap:6px;min-width:0}
+.namebox input{
+  font-family:"Kalam",cursive;font-size:26px;font-weight:700;color:var(--pencil);
+  border:none;background:transparent;width:100%;min-width:0;padding:0;
+}
+.namebox input:focus-visible{outline-offset:4px}
+.lvl{font-weight:800;font-size:15px;white-space:nowrap}
+.classrow{grid-column:1/-1;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.classrow select{
+  font-weight:600;font-size:17px;border:none;border-bottom:1px dashed var(--line);background:transparent;padding:2px 2px;cursor:pointer;
+}
+.classrow select option{background:var(--card);color:var(--ink)}
+.page{font-size:14px;color:var(--soft);font-style:italic}
+.iconbtn{
+  border:1.2px solid var(--line);background:transparent;border-radius:3px;cursor:pointer;
+  padding:2px 7px;font-size:14px;color:var(--pencil);white-space:nowrap;flex-shrink:0;
+}
+.iconbtn:disabled{opacity:.45;cursor:not-allowed}
+.iconbtn:hover{border-color:var(--ink);color:var(--ink)}
+
+.stats{display:grid;grid-template-columns:repeat(5,1fr);border:1.2px solid var(--ink);margin:4px 0 12px}
+.stat{padding:5px 6px 6px;border-right:1px solid var(--line);min-width:0}
+.stat:last-child{border-right:none}
+.stat .k{font-size:13px;color:var(--soft);display:block;line-height:1.1}
+.stat .v{font-family:"Kalam",cursive;font-size:22px;font-weight:700;color:var(--pencil);line-height:1.2;display:block}
+.stat .n{font-size:12px;color:var(--soft);display:block;line-height:1.15}
+@media (max-width:520px){.stats{grid-template-columns:repeat(3,1fr)} .stat:nth-child(3){border-right:none} .stat:nth-child(n+4){border-top:1px solid var(--line)}}
+
+.sec{margin-top:10px}
+.sec h3{font-size:15px;font-weight:800;margin:0 0 3px;display:flex;gap:8px;align-items:center}
+.sec h3 .aside{font-weight:400;font-style:italic;color:var(--soft);font-size:14px}
+.gearopts{display:flex;flex-direction:column;gap:2px;margin:2px 0 4px}
+.gearopts label{display:flex;gap:6px;align-items:flex-start;font-size:15px;cursor:pointer}
+.gearopts input{margin-top:5px;accent-color:var(--blue)}
+.items{font-family:"Kalam",cursive;color:var(--pencil);font-size:17px;line-height:1.4}
+.weapons{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:15px;margin-top:2px}
+.weapons b{font-family:"Kalam",cursive;color:var(--red);font-weight:700;font-size:17px}
+
+.goldrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dice{display:inline-flex;gap:4px}
+.die{width:24px;height:24px;border:1.5px solid var(--red);border-radius:5px;display:inline-grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:3px;background:var(--card)}
+.die i{width:4px;height:4px;border-radius:50%;background:var(--red);place-self:center;visibility:hidden}
+.die i.on{visibility:visible}
+.die.rolling{animation:tumble .45s ease-out}
+@keyframes tumble{0%{transform:rotate(-70deg) translateY(-6px)}60%{transform:rotate(12deg)}100%{transform:none}}
+@media (prefers-reduced-motion: reduce){.die.rolling{animation:none}}
+.total{font-family:"Kalam",cursive;font-weight:700;font-size:20px;color:var(--red)}
+
+.traitpick{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:2px}
+.traitpick select{border:none;border-bottom:1px dashed var(--line);background:transparent;font-size:15px;font-weight:600;max-width:100%;cursor:pointer}
+.traitpick select option{background:var(--card);color:var(--ink)}
+.traittext{font-size:15px;margin:0 0 4px;color:var(--ink)}
+.traittext em{color:var(--soft)}
+
+ul.feat{margin:2px 0 0;padding-left:18px;font-size:15px}
+ul.feat li{margin:1px 0}
+.slots{display:flex;flex-wrap:wrap;gap:6px 10px;margin-top:3px}
+.slots select{font-family:"Kalam",cursive;font-size:16px;color:var(--pencil);border:1px solid var(--line);border-radius:3px;background:var(--card);padding:1px 4px;cursor:pointer}
+.limits{margin-top:10px;font-size:14px;color:var(--soft);border-top:1px dashed var(--line);padding-top:6px}
+.limits b{color:var(--pencil);font-weight:600}
+.notes{width:100%;margin-top:6px;border:1px dashed var(--line);background:transparent;font-family:"Kalam",cursive;font-size:16px;color:var(--pencil);padding:4px 6px;min-height:2.2em;resize:vertical}
+
+.roster{margin-top:34px;border-top:2px solid var(--ink);padding-top:10px}
+.roster h2{font-size:22px;margin:0 0 6px}
+.roster ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:4px}
+.roster li{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-size:15px}
+.roster .who{font-family:"Kalam",cursive;color:var(--pencil);font-size:17px}
+.empty{color:var(--soft);font-style:italic;font-size:15px}
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:8px 16px;border-radius:3px;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+footer{margin-top:28px;font-size:13px;color:var(--soft)}
+
+@media print{
+  body{background:#fff;color:#000}
+  .toolbar,.roster,.iconbtn,.gearopts,.toast,footer,.partycheck .warning{display:none!important}
+  .sheet{box-shadow:none;break-inside:avoid}
+  .sheets{grid-template-columns:1fr 1fr}
+}
+
+.settings{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;font-size:15px;margin:-8px 0 14px}
+.settings select{border:1px solid var(--line);background:var(--card);border-radius:3px;padding:2px 6px;font-weight:600;cursor:pointer}
+.settings .counter{display:flex;gap:6px;align-items:center}
+.settings .help{color:var(--soft);font-style:italic}
+.lvlctl{display:flex;align-items:center;gap:4px;white-space:nowrap}
+.lvlctl .lv{font-weight:800;font-size:15px}
+.lvlctl .tier{font-size:13px;color:var(--soft);font-style:italic}
+.xpbox{border:1.2px dashed var(--line);padding:6px 8px;margin-top:6px;font-size:15px}
+.xpbox .row{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.xpbox input[type=number]{width:5.5em;border:1px solid var(--line);background:var(--card);border-radius:3px;padding:1px 4px}
+.xpbox .result{font-family:"Kalam",cursive;color:var(--red);font-weight:700}
+.xpbox .muted{color:var(--soft);font-style:italic}
+details.shop{margin-top:6px;border:1.2px solid var(--line);border-radius:2px}
+details.shop summary{cursor:pointer;padding:4px 8px;font-weight:700;font-size:15px}
+details.shop[open] summary{border-bottom:1px solid var(--line)}
+.shopbody{padding:6px 8px 8px;max-height:340px;overflow:auto}
+.shopbody h4{margin:8px 0 2px;font-size:14px;font-weight:800}
+.shopbody h4:first-child{margin-top:0}
+.shopitem{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:baseline;font-size:14px;padding:2px 0;border-bottom:1px dotted var(--grid-strong)}
+.shopitem .pr{color:var(--soft);white-space:nowrap}
+.shopitem .why{grid-column:1/-1;font-size:12px;color:var(--soft);font-style:italic;margin-top:-2px}
+.shopitem.no .nm{color:var(--soft)}
+.bought{display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:4px}
+.chip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:3px;padding:0 2px 0 6px;font-family:"Kalam",cursive;color:var(--pencil);font-size:15px}
+.chip button{border:none;background:transparent;cursor:pointer;color:var(--soft);font-size:14px;padding:0 4px}
+.chip button:hover{color:var(--red)}
+.pet{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:center;font-size:15px;margin-top:3px}
+.pet select{border:1px solid var(--line);background:var(--card);border-radius:3px;padding:1px 4px;cursor:pointer;max-width:100%}
+.petstat{grid-column:1/-1;font-size:14px;color:var(--pencil)}
+.petstat b{font-family:"Kalam",cursive;color:var(--red)}
+@media print{.settings,details.shop,.xpbox button,.lvlctl button{display:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Four Against Darkness<small>party builder</small></h1>
+    <div class="toolbar">
+      <button class="btn primary" id="rollParty">Roll a new party</button>
+      <label class="check"><input type="checkbox" id="coreOnly"> Core classes only</label>
+      <button class="btn" id="saveParty">Save party</button>
+      <button class="btn" id="copyMd">Copy as Markdown</button>
+      <button class="btn" id="printBtn">Print</button>
+    </div>
+  </header>
+
+  <div class="settings" id="settings">
+    <label>Advancement <select id="xpSystem" aria-label="XP system">
+      <option value="classical">Classical XP rolls (default)</option>
+      <option value="slowsure">Slow and sure</option>
+      <option value="oldschool">Old school XP tally</option>
+      <option value="slower">Slower advancement</option>
+    </select></label>
+    <label class="check"><input type="checkbox" id="freeGear"> Free equipment (no gold cost)</label>
+    <span class="counter" id="encCounter"></span>
+    <span class="help" id="xpHelp"></span>
+  </div>
+  <div class="partycheck" id="partyCheck" aria-live="polite"></div>
+  <main class="sheets" id="sheets"></main>
+
+  <section class="roster">
+    <h2>Saved parties</h2>
+    <ul id="roster"></ul>
+  </section>
+  <footer>Rules from <i>Four Against Darkness, Expanded Edition</i> by Andrea Sfiligoi (Ganesha Games). Trait and feature text is condensed; check the page noted on each sheet for the full wording.</footer>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ================= Data ================= */
+const WIZ = ["Blessing","Escape","Lightning","Fireball","Protection","Sleep"];
+const ELF_SPELLS = WIZ.filter(s=>s!=="Blessing");
+const DRUID_SPELLS = ["Disperse Vermin","Summon Beast","Water Jet","Bear Form","Warp Wood","Barkskin","Lightning Strike","Spiderweb","Entangle","Subdual","Forest Pathway","Alter Weather"];
+const ILLU_SPELLS = ["Illusionary Armor","Illusionary Mirror Image","Illusionary Servant","Disbelief","Phantasmal Binding","Illusionary Fog","Glamour Mask","Shadow Strike","Specter Swarm","Mirage of Fortune","Illusionary Banquet","Illusionary Sword"];
+const SWORN = ["Kobolds","Orcs","Goblins","Vampires","Werewolves","Hyena-Men","Trolls","Ogres","Chaos monsters","Catfolk","Dragons","Lizardmen","Serpentfolk","Mushroom men"];
+
+const W = {light:-1, hand:0, two:1, bow:0, crossbow:1, sling:-1, handgun:2, rifle:3, stars:-1};
+const RANGED = ["bow","crossbow","sling","handgun","rifle","stars"];
+const FIRE = ["handgun","rifle"];
+const ranged = k => RANGED.includes(k);
+const ALLW = Object.keys(W);
+const noFire = ALLW.filter(k=>!FIRE.includes(k));
+
+const tierOf = L => L>=20?5:L>=15?4:L>=10?3:L>=5?2:1;
+const TIER_DIE = {1:6,2:8,3:10,4:12,5:20};
+const TIER_NAME = {1:"Basic",2:"Expert",3:"Heroic",4:"Legendary",5:"Epic"};
+const half = L => Math.floor(L/2);
+
+// item helpers (starting kit)
+const it = (n, extra={}) => ({n, ...extra});
+const LA = it("Light armor",{a:1,at:"light"}), HA = it("Heavy armor",{a:2,at:"heavy"}), SH = it("Shield",{s:1});
+const HW = it("Hand weapon",{w:"hand"}), LW = it("Light weapon",{w:"light"}), TW = it("Two-handed weapon",{w:"two"});
+const BOW = it("Bow",{w:"bow"}), SLING = it("Sling",{w:"sling"}), XBOW = it("Crossbow",{w:"crossbow"}), GUN = it("Handgun",{w:"handgun"});
+
+// Shop (Equipment chapter, pp. 81–88)
+const SHOP = [
+ {g:"Weapons",items:[
+  {id:"hand",n:"Hand weapon",p:6,w:"hand"},{id:"light",n:"Light weapon",p:5,w:"light"},{id:"two",n:"Two-handed weapon",p:15,w:"two"},
+  {id:"bow",n:"Bow",p:15,w:"bow"},{id:"crossbow",n:"Crossbow",p:15,w:"crossbow"},{id:"sling",n:"Sling",p:4,w:"sling"},
+  {id:"stars",n:"Throwing star",p:2,w:"stars"},{id:"stake",n:"Stake",p:6,w:"light",note:"counts as a hand weapon vs vampires"},
+  {id:"handgun",n:"Handgun",p:30,w:"handgun"},{id:"rifle",n:"Black powder rifle",p:90,w:"rifle"},
+  {id:"quiver",n:"Replacement quiver (12 arrows)",p:6,max:4,needs:["bow","crossbow"]},{id:"shot",n:"Bag of shot",p:20,max:4,needs:["handgun","rifle"]}]},
+ {g:"Armor",items:[
+  {id:"la",n:"Light armor",p:10,at:"light",a:1},{id:"ha",n:"Heavy armor",p:30,at:"heavy",a:2},{id:"shield",n:"Shield",p:5,s:1}]},
+ {g:"Gear",items:[
+  {id:"lantern",n:"Lantern",p:4},{id:"torches",n:"Torches (bundle of 12)",p:1},{id:"hook",n:"Lantern hook",p:2},
+  {id:"rope",n:"Rope",p:4},{id:"pole",n:"10’ pole",p:2},{id:"nails",n:"Bag of nails",p:4},{id:"crowbar",n:"Crowbar",p:10},
+  {id:"picks",n:"Good lock-picks",p:25},{id:"tube",n:"Scroll tube",p:4},{id:"ration",n:"Food ration",p:1,max:10,food:true},
+  {id:"bandage",n:"Bandage",p:5},{id:"oil",n:"Flask of flammable oil",p:10,max:1},{id:"holy",n:"Holy water",p:30,max:1}]},
+ {g:"Magic and remedies",items:[
+  {id:"potion",n:"Healing potion",p:100,tag:"potion"},{id:"scroll",n:"Scroll of Blessing",p:100,tag:"scroll"},
+  {id:"amulet",n:"Amulet (1 Luck point)",p:15,max:1,tag:"magic"},{id:"talisman",n:"Talisman (+1 to one Save)",p:10,max:1,tag:"magic"},
+  {id:"tonic",n:"Herbal tonic",p:20,tag:"herbal"},{id:"repel",n:"Gremlin repellant",p:5,tag:"herbal"},
+  {id:"wolfsbane",n:"Wolfsbane",p:10,tag:"herbal"},{id:"berserk",n:"Berserker’s Mushroom",p:15,tag:"herbal",mush:true}]},
+];
+const SHOP_BY = Object.fromEntries(SHOP.flatMap(g=>g.items).map(x=>[x.id,x]));
+
+// Animal companions (p. 115)
+const ANIMALS = {
+ hawk:{n:"Hawk",L:1,life:1,atk:-1,def:2,p:20,note:"+1 to party orientation Saves; outdoors, −1 chance to be surprised; can’t attack in corridors."},
+ owl:{n:"Owl",L:1,life:1,atk:-1,def:2,p:20,note:"Attacks at −1 or gives +1 to its master’s spellcasting; kills d6 rat Vermin instead of attacking; not in corridors."},
+ peacock:{n:"Peacock",L:0,life:1,atk:-2,def:0,p:10,note:"Morale −2. +1 to its owner’s wooing and seduction Saves; not in corridors."},
+ warhound:{n:"Warhound",L:1,life:2,atk:1,def:0,p:20,note:"Morale +1. Takes a hit meant for its master on 5–6; −1 chance to be surprised; stands beside its master."},
+ wildcat:{n:"Wildcat",L:1,life:2,atk:0,def:1,p:20,note:"Kills d6 rat Vermin instead of attacking; refuses to fight other Foes on a 1."},
+ crow:{n:"Crow",L:1,life:1,atk:0,def:0,p:15,note:"+1 to Saves to disarm Traps or solve puzzles (doesn’t stack)."},
+};
+const WARHORSE = {n:"Warhorse",L:2,life:3,atk:1,def:1,p:30,note:"Mount. Usable for mounted combat outdoors; +1 Attack to a rider in position 1."};
+
+const CLASSES = [
+ {id:"warrior",name:"Warrior",core:true,page:63,life:6,saves:"Warrior",gold:2,
+  atk:(k,L)=>L, def:()=>0, stealth:()=>0,
+  allow:{ar:["light","heavy","shield"],w:ALLW},
+  armor:"Any",weapons:"Any",magic:"Any not forbidden; scrolls as a L1 caster",
+  gear:[{l:"Shield + hand weapon",i:[LA,SH,HW]},{l:"Two-handed weapon",i:[LA,TW]},{l:"Bow",i:[LA,BOW]}],
+  feat:()=>["+L to all melee and ranged Attack rolls","Casts spells from scrolls as a L1 caster"],
+  traits:[["Good Shot","+1 to Attack rolls with ranged weapons."],["Shield Expert","Once per adventure, with a shield, reduce damage from one attack by 1."],["Power Strike","Once per adventure, after rolling, one attack deals +1 damage."],["Intuitive Team Tactics","Once per combat, give an ally +1 on one Attack or Defense roll (not if surprised)."],["Tight Guard","+1 Defense vs the first attack aimed at you each combat."],["Sword/Mace Training","Pick sword or mace: +Tier to Attack rolls with it."]],
+  tmod:{0:()=>({atkR:1}),5:(L,T)=>({atkHand:T})}},
+ {id:"barbarian",name:"Barbarian",core:true,page:24,life:7,saves:"Barbarian",gold:1,nomagic:true,
+  atk:(k,L)=>L, def:()=>0, stealth:L=>half(L),
+  allow:{ar:["light","shield"],w:noFire},
+  armor:"Light armor, shield",weapons:"Any except firearms",magic:"None: no magic items, scrolls or potions (holy water and cleric healing are fine)",
+  gear:[{l:"Shield + hand weapon",i:[LA,SH,HW]},{l:"Two-handed weapon",i:[LA,TW]},{l:"Bow + light weapon",i:[LA,BOW,LW]}],
+  feat:(h,L)=>["+L to melee and ranged Attack rolls",`Rage: ${1+half(L)} rage attack${1+half(L)>1?"s":""} per adventure — roll 3 dice, keep the best, double damage on a hit`,"Illiterate: no benefit from books or inscriptions"],
+  traits:[["Beast Slayer","+1 to Attack rolls vs Weird Monsters."],["Berserk Fighting","Once per adventure, +1 damage on every attack for one combat; then −1 Attack for 6 rooms or until you Rest."],["Herbal Knowledge","Once per adventure, gather herbs to heal d3 Life (needs vegetation)."],["Survival Instinct","+1 to forage or avoid getting lost, or skip one Wandering Monster or Trap per adventure."],["Tough Skinned","Once per combat, reduce damage from one attack by 1."],["Literate","You can read (still no scroll casting)."]]},
+ {id:"dwarf",name:"Dwarf",core:true,page:30,life:5,saves:"Dwarf",gold:3,
+  atk:(k,L)=>ranged(k)?0:L, def:()=>0, stealth:L=>half(L),
+  allow:{ar:["light","heavy","shield"],w:ALLW},
+  armor:"Light, heavy, shield",weapons:"Any, including firearms",magic:"Any item not forbidden to dwarves",
+  gear:[{l:"Shield + hand weapon",i:[LA,SH,HW]},{l:"Heavy armor + two-handed weapon",i:[HA,TW]}],
+  feat:()=>["+L to melee Attack rolls (no bonus with ranged)","+1 Defense vs giants, ogres, trolls; +1 Attack vs goblins","Gold Sense: Save vs L6 (+L) to roll a Foe’s Treasure first","Miser: a party with 2+ dwarves can’t Bribe; Greedy: each dwarf gets at least 1gp from gold loot","Jewelry Merchant: +20% when selling gems and jewelry"],
+  traits:[["Axe Mastery","+1 Attack with axes in melee; can throw axes at +L."],["Underground Explorer","+1 to Search rolls in dungeons and caverns."],["Gold Nose","Once per adventure, take the maximum on a random gp or gem value."],["Stubborn Resolve","Once per adventure: reroll a failed Save vs poison/magic, reroll a failed Defense, or avoid 1 Madness."],["Gem Appraiser","Gems and jewels resell (or bribe) at +30% instead of +20%."],["Tough as Stone","Reduce damage from the first physical attack each combat by 1."]]},
+ {id:"elf",name:"Elf",core:true,page:34,life:4,saves:"Elf",gold:2,
+  atk:(k,L)=>k==="two"?0:L, def:()=>0, stealth:()=>1,
+  allow:{ar:["light","heavy","shield"],w:noFire},
+  armor:"Any, shield (casting needs light/leafsteel/elven chain and no shield)",weapons:"Any except firearms",magic:"Any; +L when casting from scrolls and items",
+  gear:[{l:"Standard kit",i:[LA,BOW,HW]}],
+  spells:{list:ELF_SPELLS,slots:L=>L},
+  feat:(h,L)=>["+L to melee and ranged Attack rolls, except two-handed weapons; a further +1 vs orcs",`${L} spell slot${L>1?"s":""} (L); basic wizard spells except Blessing, +L to casting`,"Can cast only in light armor, leafsteel or elven chain, with no shield"],
+  traits:[["Bladesong","Once per adventure, +1 Attack with swords, spears or bows for one encounter."],["Forest Born","+1 to navigate and Search in forests; once per outdoor adventure, stop Wandering Monsters surprising the party."],["Fey Grace","Once per combat, −1 damage from a melee hit and you may leave the melee freely."],["Spellwoven","Once per adventure, cast a spell and keep it in its slot."],["Silver Tongue","+Tier on Saves to persuade, woo or negotiate."],["Elidra’s Melody","Once per adventure, music calms a creature for a turn or rerolls a Reaction."]]},
+ {id:"cleric",name:"Cleric",core:true,page:28,life:4,saves:"Cleric",gold:1,
+  atk:(k,L)=>half(L), def:()=>0, stealth:L=>half(L),
+  allow:{ar:["light","heavy","shield"],w:["light","hand","two","sling"]},
+  armor:"Light, heavy, shield",weapons:"Light, hand, two-handed, sling",magic:"Any item not forbidden to clerics",
+  gear:[{l:"Shield + hand weapon",i:[LA,SH,HW]},{l:"Two-handed weapon",i:[LA,TW]}],
+  feat:(h,L)=>[`+½L to Attack rolls; +L (${sgn(L)}) vs undead`,`Healing prayer ×3 per adventure: heal d6${sgn(L)}`,"Blessing prayer ×3 per adventure: removes curses, stone and similar conditions","Prayers take 1 turn and need no free hand"],
+  traits:[["Blessed Touch","Once per adventure, heal Tier Life by touch without a prayer."],["Sacred Defense","+1 Defense vs Demons and Undead."],["Divine Protection","Once per adventure, +1 to Defense and Saves for one combat."],["Holy Resilience","+1 Life (another at L10)."],["Chant of Valor","Once per adventure, free action: all allies +1 Attack for one turn."],["Strength of Spirit","Once per adventure, stay at 1 Life when a blow drops you to 0 or below."]],
+  tmod:{3:L=>({life:L>=10?2:1})}},
+ {id:"rogue",name:"Rogue",core:true,page:60,life:3,saves:"Rogue",gold:3,
+  atk:()=>0, def:L=>L, stealth:L=>L,
+  allow:{ar:["light"],w:["light","sling","stars"]},
+  armor:"Light armor",weapons:"Light weapons, sling",magic:"Any not forbidden; scrolls as a L1 caster",
+  gear:[{l:"Standard kit",i:[LA,LW,it("Rope"),it("Lock-picks")]}],
+  feat:(h,L)=>["+L to Defense rolls",`+L (${sgn(L)}) Attack vs outnumbered Minor Foes (when PCs outnumber them)`,"+L to Saves vs Traps and to pick locks"],
+  traits:[["Knife Fighter","+Tier Attack with daggers and throwing knives."],["Evasion","Once per adventure, automatically pass a Save to avoid damage or a bad effect."],["Shadow-walker","+Tier to Stealth rolls."],["Delicate Touch","+Tier to lock-picking and disarming Traps."],["Street Thug","+1 Life; may use hand weapons and starts with one."],["Backstabber","Your outnumbered bonus also works vs Major Foes."]],
+  tmod:{0:(L,T)=>({atkLight:T}),2:(L,T)=>({stealth:T}),4:()=>({life:1,addItem:HW,allowW:["hand"]})}},
+ {id:"wizard",name:"Wizard",core:true,page:64,life:2,saves:"Wizard",gold:4,
+  atk:()=>0, def:()=>0, stealth:()=>0,
+  allow:{ar:[],w:["light","sling"]},
+  armor:"None",weapons:"Light weapon, sling",magic:"Any not class-restricted; +L casting from scrolls",
+  gear:[{l:"Standard kit",i:[LW,it("Spellbook"),it("Writing implements")]}],
+  spells:{list:WIZ,slots:L=>L+2},
+  feat:(h,L)=>["+L to spellcasting rolls; never to melee Attack rolls",`Spell slots: ${L+2} (L+2). Knows all 6 basic spells; copies allowed`,"Recover 1 spent slot when Resting","Spell Burning: with no slots left, burn a spellbook page as a scroll","+L to Saves vs puzzles and magic"],
+  traits:[["Arcane Memory","+1 spell slot."],["Keen Observer","+1 to Search rolls."],["Spell Efficiency","Once per adventure, cast a spell and keep it in its slot."],["Sygilist","+Tier casting from scrolls or inscriptions."],["Scrapper","+1 Defense; ignore the −1 with one chosen light weapon."],["Specialist","Pick Lightning, Sleep or Fireball: +Tier to cast it."]],
+  tmod:{0:()=>({slots:1}),4:()=>({def:1,atkLight:1})}},
+ {id:"halfling",name:"Halfling",core:true,page:40,life:3,saves:"Halfling",gold:2,traitCount:2,
+  atk:(k,L)=>k==="sling"?L:0, def:()=>0, stealth:L=>L,
+  allow:{ar:["light"],w:["light","sling"]},
+  armor:"Light armor",weapons:"Light weapon, sling",magic:"Scrolls and non-restricted items",
+  gear:[{l:"Standard kit",i:[SLING,LW]}], food:{n:1,s:6,plus:3},
+  feat:(h,L)=>[`Luck: ${L+1} points (L+1) — run from melee freely, or reroll Attack, Defense, Save, Search or Treasure`,"+L Defense vs giants, trolls, ogres, half-giants; +L with slings","Nourishing Meal once per adventure when Resting: allies eating heal 1 Life"],
+  traits:[["Lucky Sidestep","Once per adventure per level, reroll a failed Save."],["Nimble Dodge","+1 to Defense rolls."],["Sling Skill","+Tier Attack with slings."],["Iron Stomach","Immune to ingested poison, +Tier vs poison and gas, +1 Life."],["Fungi Forager","Once per adventure near fungi: a rare specimen, an extra meal, d6 healing, or double rations."],["Comforting Cook","When Resting, spend 1 ration: you and one ally heal 1 extra Life."]],
+  tmod:{1:()=>({def:1}),2:(L,T)=>({atkSling:T}),3:()=>({life:1})}},
+
+ {id:"acrobat",name:"Acrobat",page:19,life:3,saves:"Rogue",gold:1,
+  atk:(k,L)=>half(L), def:L=>L, stealth:L=>L,
+  allow:{ar:[],w:["light","sling","stars"]},
+  armor:"None",weapons:"Light weapons, light ranged weapons",magic:"As a rogue",
+  gear:[{l:"Knife",i:[it("Knife (light weapon)",{w:"light"}),it("Rope"),it("Loose clothes")]},{l:"Club",i:[it("Club (light weapon)",{w:"light"}),it("Rope"),it("Loose clothes")]}],
+  feat:(h,L,T)=>["+½L Attack, +L Defense",`Tricks: ${L+3} points (L+3); recover ${T} when Resting — Leap out of Harm, Shift Position, Distract, Flip Kick, Double Kick, Evade, Graceful Move, Serpent Twist, Knife Throw, Acrobatic Performance, Vaulting Strike, Juggling`,"+L to swimming, climbing and falling Saves; +½L vs other Traps"],
+  traits:[["Graceful Dodge","Once per combat, reduce damage from a physical attack by 1."],["Quick Climber","+Tier on Climbing Saves."],["Master of Evasion","Evade costs no Trick points."],["Distracting Feint","Once per combat in melee, cancel a Foe’s next attack."],["Distract","Once per combat in melee, a Foe is −1 L for one turn."],["Quick Draw Talent","Draw or swap weapons and still attack that turn."]]},
+ {id:"assassin",name:"Assassin",page:22,life:3,saves:"Rogue",gold:5,
+  atk:(k,L)=>L, def:()=>0, stealth:()=>0,
+  allow:{ar:["light"],w:ALLW},
+  armor:"Light armor only",weapons:"Any, including firearms",magic:"As a rogue; may use rogue-only items",
+  gear:[{l:"Hand weapon + light weapon",i:[LA,HW,LW,it("Lock-picks")]},{l:"Hand weapon + bow",i:[LA,HW,BOW,it("Lock-picks")]},{l:"Crossbow + light weapon",i:[LA,XBOW,LW,it("Lock-picks")]},{l:"Handgun + light weapon",i:[LA,GUN,LW,it("Lock-picks")]}],
+  feat:()=>["+L to all Attack rolls","Hide in Shadows: Stealth Save (+L) vs Foe L; next hit on the marked target deals triple damage (living, anatomical targets)","Can find/disarm Traps and pick locks (no +L); +L to disguise Saves"],
+  traits:[["Deadly Precision","Once per adventure, +2 damage on a hit vs an unaware Foe (needs a Stealth Save)."],["Poison Expert","+1 on Saves to craft, handle or resist poison."],["Silent Step","+Tier to Stealth Saves."],["Lethal Dodge","An exploding Defense roll lets you strike back in melee."],["Quick Escape","Once per level per adventure, leave melee without being attacked."],["Deception","+L to bluff, lie or impersonate."]],
+  tmod:{2:(L,T)=>({stealth:T})}},
+ {id:"bulwark",name:"Bulwark",page:26,life:7,saves:"Warrior",gold:1,rare:true,
+  atk:(k,L,T)=>ranged(k)?T:half(L), def:L=>half(L), stealth:()=>0,
+  allow:{ar:["light","heavy","shield"],w:noFire},
+  armor:"Light, heavy, shield",weapons:"Any except firearms",magic:"Warrior items; scrolls as a L1 wizard",
+  gear:[{l:"Standard kit",i:[HA,SH,HW]}],
+  feat:()=>["+½L melee Attack and Defense; +Tier ranged Attack","Rare: only one bulwark per party","Limited healing: other healing goes to wounded allies first (bandages are fine)"],
+  traits:[["Shieldwall","Once per adventure, you and an adjacent shield-bearing ally get +1 Defense vs melee for the encounter."],["Guardian Stance","Take a hit aimed at an adjacent ally (declare before the roll; you roll Defense)."],["Iron Will","Reroll failed Saves vs Madness and mental effects; ignore your first Madness each adventure."],["Shield Bash","Once per combat, after a successful Defense, bash with your shield at +L."],["Brace for Impact","Once per combat, reduce damage from one attack by 1."],["Stubborn Endurance","Once per adventure, a blow that drops you to 1 or 0 leaves you at 2."]]},
+ {id:"druid",name:"Druid",page:32,life:3,saves:"Cleric",gold:2,druidPet:true,
+  atk:(k,L)=>half(L), def:()=>0, stealth:L=>half(L),
+  allow:{ar:["light","shield"],w:["light","bow","sling"]},
+  armor:"Light, leafsteel, shield",weapons:"Staff, sickle, club, dagger, javelins, short bow, sling",magic:"Other spells from scrolls/items at +½L (min +1)",
+  gear:[{l:"Standard kit",i:[LW]}],
+  spells:{list:DRUID_SPELLS,slots:L=>2+L},
+  feat:(h,L)=>["+½L to Attack rolls",`Spell slots: ${2+L} (2+L), druid list, +L to casting; memorize between adventures`,"Animal companion of its own will (plus a mount): pay only 1gp of food; gain 1 Madness if it dies"],
+  traits:[["Wildform","Once per adventure, become a small animal for an encounter."],["Beast Friend","Shift natural animals’ Reaction rolls by 1."],["Verdant Blessing","Once per adventure, heal d3 Life in natural surroundings."],["Leafsteel Familiarity","+1 more Defense in leafsteel armor."],["Nature’s Bounty","Once per adventure outdoors or in grottoes, find 2 rations or 1 Life of healing."],["Rootbind","Once per adventure, a Foe loses its next turn."]]},
+ {id:"gnome",name:"Gnome",page:36,life:4,saves:"Rogue",gold:4,
+  atk:()=>0, def:L=>half(L), stealth:()=>0,
+  allow:{ar:["light"],w:["light","sling","hand","bow","handgun"]},
+  armor:"Light, leafsteel, clockwork",weapons:"Light, sling, hand, bow, handgun, clockwork",magic:"Scrolls and items as a L1 caster (+L for illusion spells)",
+  gear:[{l:"Standard kit",i:[LW,it("Contraption"),it("Lock-picks & precision tools (15gp)")]}],
+  spells:{list:ILLU_SPELLS,slots:L=>L,single:true},
+  feat:(h,L)=>{const f=h.traits.includes(0);return ["+½L to Defense rolls",`Gadget points: ${L+(f?8:6)} (L+${f?8:6}) — weapons, locks, smokescreen, grenade and more`,`One illusionist spell, ${L} slot${L>1?"s":""}, +L to cast`,"+L vs poison and gases; +L to disarm Traps"]},
+  traits:[["Fixer","Gadget points are L+8 instead of L+6."],["Illusionist’s Trick","Once per adventure, cast any extra illusionist spell without a slot."],["Clockwork Armor Specialist","In clockwork armor, +1 Defense vs the first attack each combat."],["Trap Expert","+Tier to disarm Traps and pick locks."],["Keen Nose","+2 vs gases; once per adventure cancel a surprise."],["Clockwork Grenadier","Once per adventure, a grenade deals 2 damage before melee."]]},
+ {id:"illusionist",name:"Illusionist",page:42,life:2,saves:"Wizard",gold:3,
+  atk:()=>0, def:()=>0, stealth:L=>half(L),
+  allow:{ar:[],w:["light","sling","stars"]},
+  armor:"None",weapons:"Light weapon, light ranged weapon",magic:"As a wizard",
+  gear:[{l:"Knife",i:[it("Knife (light weapon)",{w:"light"}),it("Clothes")]},{l:"Walking stick",i:[it("Walking stick (light weapon)",{w:"light"}),it("Clothes")]}],
+  spells:{list:ILLU_SPELLS,slots:L=>L+3},
+  feat:(h,L)=>["+L to spellcasting rolls",`Spell slots: ${L+3} (L+3), illusionist list`,"Distracting Lights: cast vs Foe L to lower it by Tier (no slot used)","Continual Light on a worn item","Illusionary Knife Throw: spend a slot, Attack at +Tier+L"],
+  traits:[["Phantom Reflex","Once per combat, a double takes a hit for you."],["Glamour Specialist","+Tier on social Saves using disguise illusions."],["Misdirection","Once per adventure, a Foe attacks a phantom instead of an ally."],["Shadow Adept","+Tier casting Shadow Strike; it counts as magical damage."],["Hazy Veil","Once per adventure, +Tier Defense for an encounter."],["Spectral Trickster","Once per adventure after an illusion, flee freely or strike at +Tier."]]},
+ {id:"kukla",name:"Kukla",page:44,life:5,saves:"Rogue",gold:3,rare:true,artificial:true,
+  atk:k=>k==="light"?1:0, def:L=>half(L), stealth:L=>half(L),
+  allow:{ar:[],w:["light","sling","stars"]},
+  armor:"None",weapons:"Light weapon, light ranged weapon",magic:"Any, including wizard items; scrolls allowed; no potions or herbal remedies",
+  gear:[{l:"Standard kit",i:[it("Dagger (light weapon)",{w:"light"}),it("Doll clothes"),it("Red ring"),it("Green ring")]}],
+  feat:()=>["+1 Attack with light slashing weapons (flat); +½L Defense; claws and bite at −1","Rare: only one kukla per party","Artificial: immune to poison, disease, stone, mind control; no healing — repaired for 1gp per Life","Green ring revives her once; red ring holds one lethal poison dose","Secret compartment and prehensile hair (+½L lock-picking)"],
+  traits:[["Hair Mastery","Once per adventure, disarm a Trap or open a lock with hair at +L."],["Hidden Blade","Once per encounter, draw a hidden knife and strike, +Tier damage."],["Unyielding Form","Once per adventure, ignore up to 2 damage in one combat."],["Creepy Charm","Reroll Reactions of living Foes."],["Hair Bind","Once per adventure, bind a human-sized Foe for 2 turns (−2 L)."],["Clockwork Reflexes","Reroll failed Saves vs Traps and Defense vs ranged attacks."]]},
+ {id:"gladiator",name:"Light Gladiator",page:49,life:5,saves:"Warrior or rogue",gold:1,
+  atk:(k,L)=>k==="light"?half(L):0, def:L=>half(L), stealth:()=>0,
+  allow:{ar:["light"],w:["light"]},
+  armor:"Light, leafsteel",weapons:"Light hand weapons only",magic:"As warriors; scrolls as a L1 wizard",
+  gear:[{l:"Standard kit",i:[LW,LW,it("Rope"),it("Lantern")]}],
+  feat:(h,L)=>["+½L Attack (light weapons only) and Defense","Two-weapon fighting: 2 attacks per turn, or 1 attack and parry for +1 Defense","Parry and counter-strike once per combat on an exploding Defense",L>=3?"Gladiator skill: +1 Attack and Defense in Trial of Champions fights":"Gladiator skill free at L3"],
+  traits:[["Blade Mastery","Once per combat, reroll a failed melee Attack."],["Quick Feint","Once per adventure, skip an attack to give a Foe −2 L vs your next one."],["Arena Reflexes","Once per combat, after a successful Defense, flee freely."],["Nimble Step","+Tier vs Traps and area dangers."],["Twin Strike Precision","+1 damage when both attacks hit the same Foe."],["Opportunist","Once per combat, a free off-hand strike after a successful Defense."]]},
+ {id:"monk",name:"Mushroom Monk",page:51,life:4,saves:"Cleric",gold:1,rare:true,nomush:true,
+  atk:(k,L,T,n)=>(["stars","unarmed"].includes(k)||/bo|nunchaku|sai/i.test(n||""))?L:half(L), def:L=>half(L), stealth:L=>half(L),
+  allow:{ar:[],w:noFire},
+  armor:"None",weapons:"All except firearms",magic:"Any not restricted, but no mushroom-based remedies; scrolls as a L1 caster",
+  gear:[{l:"Bo or nunchaku",i:[it("Sash"),it("Bo or nunchaku (crushing hand weapon)",{w:"hand"})]},{l:"12 throwing stars",i:[it("Sash"),it("12 throwing stars",{w:"stars"})]}],
+  feat:(h,L,T)=>["+L Attack with nunchaku, bo, sai, unarmed or throwing stars; +½L otherwise; +½L Defense","Rare: only one per party",`Flurry of Blows: ${T} attack${T>1?"s":""} per turn unarmed, with stars or nunchaku`,`Martial arts: hands count as ${L>=5?"hand":"light"} weapons`,`Spores: ${T+(h.traits.includes(0)?1:0)} per adventure — living Minor Foes −1 L`,"Hyphae once per adventure outdoors or in grottoes"],
+  traits:[["Abundant Spores","Use spores one extra time per adventure."],["High Kicks","Kicks ignore the −1, but a 1 knocks you down."],["Poisonous Flesh","Once per combat, a Foe that bites you takes 1 damage two turns later."],["Fruitful","Once per adventure, grow d3 rations of mushrooms."],["Slow Regeneration","Recover 1 extra Life per adventure."],["Tough Cap","+1 to Defense rolls."]],
+  tmod:{5:()=>({def:1})}},
+ {id:"paladin",name:"Paladin",page:55,life:6,saves:"Warrior",gold:1,
+  atk:(k,L)=>L, def:()=>0, stealth:()=>0,
+  allow:{ar:["light","heavy","shield"],w:noFire},
+  armor:"Shield, light, heavy",weapons:"Any except firearms",magic:"Anything allowed to warriors",
+  gear:[{l:"Shield + hand weapon",i:[HA,SH,HW]},{l:"Two-handed weapon",i:[HA,TW]}],
+  feat:(h,L)=>["+L to Attack rolls",`Prayer points: ${L+1} (L+1) — heal 1 Life each, reroll a failed Save, or summon a steed outdoors`,"Automatically passes Fear Saves",`Tithes ${L*10}gp (L×10, or all gems and gold) after each adventure; never flees; won’t leave a mission unfinished`],
+  traits:[["Armor Mastery","Once per combat in heavy armor, reduce damage by 1."],["Mounted Fighter","+Tier Attack while mounted."],["Challenge","Force one Foe to target you for the whole combat."],["Oathbound","+L vs effects that make you attack allies or flee."],["Shield Wall","With shields, you and an adjacent ally get +1 Defense."],["Encouraging Presence","Allies +Tier vs Fear, Terror and Madness while you lead."]]},
+ {id:"ranger",name:"Ranger",page:57,life:6,saves:"Warrior",gold:2,
+  atk:(k,L)=>L, def:()=>0, stealth:L=>`${sgn(L)} out / ${sgn(half(L))} in`,
+  allow:{ar:["light","shield"],w:["light","hand","bow","crossbow","sling"]},
+  armor:"Shield, light armor",weapons:"Light, hand, bows, slings (no two-handed, no firearms)",magic:"Warrior items + one druid item; scrolls as L1 caster",
+  gear:[{l:"Slashing hand weapons",i:[it("Hand weapon (slashing)",{w:"hand"}),it("Hand weapon (slashing)",{w:"hand"}),LW,BOW,LA]},{l:"Blunt hand weapons",i:[it("Hand weapon (blunt)",{w:"hand"}),it("Hand weapon (blunt)",{w:"hand"}),LW,BOW,LA]}],
+  food:{n:1,s:3,plus:0}, sworn:true,
+  feat:(h,L)=>[`+L to all Attack rolls; two matching weapons: 2 attacks at ${sgn(half(L))} (no explosions); outdoors a bow shoots twice at ${sgn(half(L))}`,"Sworn Enemy: higher Tier die for Stealth, Attack and Defense vs that Foe","Tracking: −1 Clue to hunt a Foe; reroll the Final Boss roll once per adventure","+L to Climbing, Tracking and Swimming Saves","Can learn Survival skills from L1"],
+  traits:[["Deadeye","+1 to ranged attacks with bows and crossbows."],["Track Master","Save at +L vs Wandering Monsters’ L to avoid surprise."],["Forager","Once per adventure, find 4 rations or herbs healing d6."],["Beast Whisperer","Shift wild animals’ Reaction rolls by 2."],["Snare Master","Once per adventure, auto-disarm an outdoor Trap."],["Stealth Master","+Tier Stealth outdoors."]],
+  tmod:{0:()=>({atkBow:1})}},
+ {id:"swashbuckler",name:"Swashbuckler",page:61,life:4,saves:"Rogue",gold:2,
+  atk:(k,L)=>half(L), def:L=>half(L), stealth:L=>half(L),
+  allow:{ar:[],w:["light","hand","sling","handgun","rifle"]},
+  armor:"None",weapons:"Light, hand, sling, firearms",magic:"Any not restricted; scrolls as a L1 caster",
+  gear:[{l:"Plumed cavalier hat",i:[HW,LW,it("Plumed cavalier hat"),it("Half-cape")]},{l:"Tricorn cap",i:[HW,LW,it("Tricorn cap"),it("Half-cape")]}],
+  feat:(h,L)=>["+½L Attack and Defense","Two attacks per turn: hand weapon main hand, light weapon off-hand",`Panache: gain 1 per kill, max ${L} (L); spend for +1 on an Attack or Defense`],
+  traits:[["Flourishing Strike","Once per combat, after a hit, an extra off-hand attack."],["Daring Escape","Once per adventure, disengage freely; an ally gets +1 on the next Attack."],["Riposte","Once per combat, counterattack when a melee attack misses you."],["Lucky Hat","Once per adventure, reroll a failed Defense at +1 (a 1 ruins the hat)."],["Taunt","Once per combat, a Foe is −Tier L next turn."],["Blade Dance","Once per adventure, spend Panache for +1 each on next Attack and Defense."]]},
+];
+const CORE_IDS = CLASSES.filter(c=>c.core).map(c=>c.id);
+const byId = Object.fromEntries(CLASSES.map(c=>[c.id,c]));
+
+/* ================= Helpers ================= */
+const d = n => 1 + Math.floor(Math.random()*n);
+const pick = a => a[Math.floor(Math.random()*a.length)];
+function sgn(n){ return n>=0 ? `+${n}` : `−${Math.abs(n)}`; }
+const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const rollDice = (n, sides=6) => Array.from({length:n},()=>d(sides));
+const SYL = {a:["Bru","Tha","Ka","Mor","Gra","Ul","Dra","Har","Vel","Bor","Ser","Mi","Ely","Ar","Lu","Fen","Ri","Ost","Ze","Ga","Ny","Qua"],b:["go","rin","dra","mar","ric","wen","lia","dor","the","nok","sa","vik","ra","dun","ell","bur","is","ka"],c:["","","n","s","th","r","l","x","d","a"]};
+const randName = () => pick(SYL.a)+pick(SYL.b)+pick(SYL.c);
+
+/* ================= Hero model ================= */
+function newHero(clsId){
+  const c = byId[clsId], tc = c.traitCount||1, traits=[];
+  while(traits.length<tc){ const r=d(6)-1; if(!traits.includes(r)) traits.push(r); }
+  const h = {cls:clsId,name:randName(),L:1,gear:0,traits,gold:rollDice(c.gold),food:null,spells:[],sworn:null,notes:"",
+             bought:[],goldAdj:0,pet:null,mount:null,dogArmor:false,xp:0,lastRoll:null,free:[],petFree:false,mountFree:false,dogFree:false};
+  if(c.food) h.food = rollDice(c.food.n, c.food.s);
+  if(c.sworn) h.sworn = pick(SWORN);
+  fillSpells(h, true);
+  return h;
+}
+function upgrade(h){ // older saves
+  return Object.assign({L:1,bought:[],goldAdj:0,pet:null,mount:null,dogArmor:false,xp:0,lastRoll:null,free:[],petFree:false,mountFree:false,dogFree:false}, h);
+}
+function tmods(h){
+  const c=byId[h.cls], T=tierOf(h.L);
+  const m={life:0,def:0,stealth:0,atkR:0,atkHand:0,atkLight:0,atkSling:0,atkBow:0,slots:0,addItem:null,allowW:[]};
+  for(const t of h.traits){ const f=c.tmod&&c.tmod[t]; if(!f) continue; const o=f(h.L,T);
+    for(const k in o){ if(k==="addItem") m.addItem=o[k]; else if(k==="allowW") m.allowW.push(...o[k]); else m[k]+=o[k]; } }
+  return m;
+}
+function slotCount(h){ const c=byId[h.cls]; return c.spells ? c.spells.slots(h.L)+tmods(h).slots : 0; }
+function fillSpells(h, random){
+  const c=byId[h.cls]; if(!c.spells){h.spells=[];return;}
+  const n=slotCount(h);
+  if(c.spells.single){ const s=(!random&&h.spells[0])||pick(c.spells.list); h.spells=Array(n).fill(s); return; }
+  const out=[]; for(let i=0;i<n;i++) out.push((!random&&h.spells[i])||pick(c.spells.list)); h.spells=out;
+}
+function kitItems(h){
+  const c=byId[h.cls]; const list=[...(c.gear[h.gear]||c.gear[0]).i]; const m=tmods(h);
+  if(m.addItem) list.push(m.addItem);
+  return list;
+}
+function allItems(h){ return [...kitItems(h), ...h.bought.map(id=>SHOP_BY[id]), ...h.free.map(id=>SHOP_BY[id])]; }
+function startGold(h){ return h.gold.reduce((a,b)=>a+b,0); }
+function spent(h){
+  let s=h.bought.reduce((a,id)=>a+SHOP_BY[id].p,0);
+  s+=(h.petFree?0:petCost(h))+(h.mount&&!h.mountFree?WARHORSE.p:0)+(h.dogArmor&&!h.dogFree?50:0);
+  return s;
+}
+function petCost(h){ if(!h.pet) return 0; return byId[h.cls].druidPet ? 1 : ANIMALS[h.pet].p; }
+function goldLeft(h){ return startGold(h)+h.goldAdj-spent(h); }
+function foodCount(h){
+  const c=byId[h.cls]; let f=0; if(h.food) f=h.food.reduce((a,b)=>a+b,0)+c.food.plus;
+  return f + [...h.bought,...h.free].filter(x=>x==="ration").length;
+}
+function canUse(h, item){
+  const c=byId[h.cls], m=tmods(h);
+  if(item.w && !(c.allow.w.includes(item.w)||m.allowW.includes(item.w))) return `${c.name}s can’t use this weapon`;
+  if(item.at && !c.allow.ar.includes(item.at)) return `${c.name}s can’t wear ${item.at} armor`;
+  if(item.s && !c.allow.ar.includes("shield")) return `${c.name}s can’t use shields`;
+  if(c.nomagic && ["magic","potion","scroll"].includes(item.tag)) return "Barbarians can’t use magic items, scrolls or potions";
+  if(c.artificial && ["potion","herbal"].includes(item.tag)) return "Kuklas can’t use potions or herbal remedies";
+  if(c.nomush && item.mush) return "Mushroom monks won’t use mushroom remedies";
+  if(item.needs && !allItems(h).some(x=>item.needs.includes(x.w))) return "Needs a matching weapon";
+  const own = [...h.bought,...h.free].filter(x=>x===item.id).length;
+  if(item.food && foodCount(h)>=10) return "Carry limit: 10 rations";
+  if(item.max && own>=item.max) return `Limit: ${item.max} per hero`;
+  return null;
+}
+function computed(h){
+  const c=byId[h.cls], L=h.L, T=tierOf(L), m=tmods(h), its=allItems(h);
+  const die = `d${TIER_DIE[T]}`;
+  const life = L + c.life + m.life;
+  const armor = Math.max(0,...its.map(x=>x.a||0));
+  const shield = its.some(x=>x.s)?1:0;
+  const defense = c.def(L,T) + armor + shield + m.def;
+  let stealth = c.stealth(L,T);
+  if(typeof stealth==="number"){ stealth += m.stealth - (shield?1:0) - (its.some(x=>x.at==="heavy")?1:0); stealth = sgn(stealth); }
+  const seen=new Set(), weapons=[];
+  for(const x of its){ if(!x.w) continue; const key=x.n; if(seen.has(key)) continue; seen.add(key);
+    let b = W[x.w] + c.atk(x.w,L,T,x.n);
+    if(ranged(x.w)) b+=m.atkR;
+    if(x.w==="hand") b+=m.atkHand;
+    if(x.w==="light") b+=m.atkLight;
+    if(x.w==="sling") b+=m.atkSling;
+    if(x.w==="bow"||x.w==="crossbow") b+=m.atkBow;
+    weapons.push({n:x.n.replace(/ \(.*\)$/,""),b});
+  }
+  let ub;
+  if(h.cls==="monk") ub = (L>=5?0:-1) + L;
+  else if(h.cls==="kukla") ub = -1;
+  else ub = -2 + c.atk("unarmed",L,T,"");
+  weapons.push({n:"Unarmed",b:ub});
+  return {L,T,die,life,defense,stealth,weapons,its};
+}
+const diceStr = (die,b) => `${die}${b?sgn(b):""}`;
+
+/* ================= State ================= */
+const KEY="4ad-party-v2", OLDKEY="4ad-party-v1", ROSTER="4ad-roster-v1";
+let party=null, coreOnly=false, meta={xp:"classical",minor:0,last:null,banked:0,freeGear:false};
+function store(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function load(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null}catch(e){return null}}
+function save(){ store(KEY,{party,coreOnly,meta}); }
+
+function randomClasses(n=4, existing=[]){
+  const pool = coreOnly ? CORE_IDS : CLASSES.map(c=>c.id); const out=[];
+  while(out.length<n){ const id=pick(pool); if(byId[id].rare && [...out,...existing].includes(id)) continue; out.push(id); }
+  return out;
+}
+function rollParty(){ party = randomClasses().map(newHero); meta.minor=0; meta.last=null; meta.banked=0; save(); render(true); }
+
+/* ================= Levels & XP ================= */
+const XP_HELP = {
+  classical:"Roll d6 higher than L to gain a level (a 6 always works). 1 XP per 10 Minor Foe encounters, per Major Foe, per Secret, +1 for the Final Boss.",
+  slowsure:"No rolls: after each successful adventure, one surviving hero gains a level.",
+  oldschool:"Tally XP (Foe levels, Major Foes L×10 +5 per Life, 1 per gp). Spend (Tier+2)×100 to level up.",
+  slower:"Bank XP as in the classical system. Spend XP equal to the target level to try an XP roll; each extra XP is +1. Training gold at each new Tier.",
+};
+const TRAINING = {2:500,3:1000,4:2500,5:5000};
+function setLevel(i, L, viaXP){
+  const h=party[i]; const old=h.L; h.L=Math.max(1,Math.min(20,L));
+  fillSpells(h,false);
+  if(viaXP && h.L>old) meta.last=i;
+  return h.L!==old;
+}
+function aliveCount(){ return party.length; }
+function blockedJustLevelled(i){ return meta.last===i && aliveCount()>1; }
+
+/* ================= Rendering ================= */
+const PIPS={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
+const die = (v,anim) => `<span class="die${anim?" rolling":""}" aria-label="${v}">${[...Array(9)].map((_,i)=>`<i class="${PIPS[v].includes(i)?"on":""}"></i>`).join("")}</span>`;
+
+function xpBox(h,i){
+  const L=h.L, T=tierOf(L), sys=meta.xp, blocked=blockedJustLevelled(i);
+  const lastR = h.lastRoll ? `<span class="result">${esc(h.lastRoll)}</span>` : "";
+  const blockNote = blocked ? `<span class="muted">Just levelled up — give the next XP to another hero.</span>` : "";
+  if(L>=20) return `<div class="xpbox"><span class="muted">Maximum level reached.</span></div>`;
+  if(sys==="classical") return `<div class="xpbox"><div class="row">
+      <button class="iconbtn" data-act="xproll" data-i="${i}"${blocked?" disabled":""}>XP roll (need ${L>=6?"6":`${L+1}+`})</button>${lastR}${blockNote}</div></div>`;
+  if(sys==="slowsure") return `<div class="xpbox"><div class="row">
+      <button class="iconbtn" data-act="slowsure" data-i="${i}">Level up — adventure completed</button>${lastR}</div></div>`;
+  if(sys==="oldschool"){ const cost=(T+2)*100;
+    return `<div class="xpbox"><div class="row">XP tally <span class="result">${h.xp}</span>
+      <input type="number" min="0" step="1" data-act="xpamt" data-i="${i}" aria-label="XP to add" placeholder="+XP">
+      <button class="iconbtn" data-act="xpadd" data-i="${i}">Add</button>
+      <button class="iconbtn" data-act="xpspend" data-i="${i}"${h.xp<cost||blocked?" disabled":""}>Spend ${cost} XP to level up</button></div>
+      ${blockNote}${lastR?`<div class="row">${lastR}</div>`:""}</div>`; }
+  if(sys==="slower"){ const need=L+1, newT=tierOf(L+1), train=newT>T?TRAINING[newT]:0;
+    return `<div class="xpbox"><div class="row">Banked XP <span class="result">${h.xp}</span>
+      <button class="iconbtn" data-act="xpplus" data-i="${i}" aria-label="Add 1 XP">+1</button>
+      <button class="iconbtn" data-act="xpminus" data-i="${i}" aria-label="Remove 1 XP">−1</button>
+      <label>extra <input type="number" min="0" step="1" value="0" data-act="xpextra" data-i="${i}" aria-label="Extra XP to spend"></label>
+      <button class="iconbtn" data-act="xpslower" data-i="${i}"${h.xp<need||blocked?" disabled":""}>Spend ${need} XP and roll</button></div>
+      <div class="row muted">Each extra XP spent is +1 to the roll.${train?` Reaching L${L+1} also costs ${train}gp training.`:""}</div>
+      ${blockNote}${lastR?`<div class="row">${lastR}</div>`:""}</div>`; }
+  return "";
+}
+
+function shopHTML(h,i){
+  return `<details class="shop" data-i="${i}"${openShops.has(i)?" open":""}><summary>${meta.freeGear?"Take equipment (free)":"Buy equipment"}</summary><div class="shopbody">
+  ${SHOP.map(g=>`<h4>${g.g}</h4>${g.items.map(x=>{const why=canUse(h,x);
+    return `<div class="shopitem${why?" no":""}"><span class="nm">${esc(x.n)}${x.w?` <span class="pr">(${W[x.w]?sgn(W[x.w]):"±0"})</span>`:""}${x.a?` <span class="pr">(+${x.a} Def)</span>`:""}</span><span class="pr">${x.p}gp</span>
+      <button class="iconbtn" data-act="buy" data-i="${i}" data-id="${x.id}"${why?" disabled":""}>${meta.freeGear?"Take":"Buy"}</button>${why?`<span class="why">${esc(why)}</span>`:x.note?`<span class="why">${esc(x.note)}</span>`:""}</div>`}).join("")}`).join("")}
+  </div></details>`;
+}
+function boughtHTML(h,i){
+  if(!h.bought.length && !h.free.length) return "";
+  const chips=(list,free)=>{ const counts={}; list.forEach(id=>counts[id]=(counts[id]||0)+1);
+    return Object.entries(counts).map(([id,n])=>`<span class="chip">${esc(SHOP_BY[id].n)}${n>1?` ×${n}`:""}${free?` <span class="aside" style="font-family:Alegreya,serif;font-size:12px">free</span>`:""}<button data-act="unbuy" data-i="${i}" data-id="${id}"${free?' data-free="1"':""} title="${free?"Remove":"Return for a full refund"}" aria-label="Remove ${esc(SHOP_BY[id].n)}">×</button></span>`).join(""); };
+  return `<div class="bought" aria-label="Added items">${chips(h.bought,false)}${chips(h.free,true)}</div>`;
+}
+function petHTML(h,i){
+  const c=byId[h.cls], druid=!!c.druidPet;
+  const opts = `<option value="">None</option>`+Object.entries(ANIMALS).map(([k,a])=>`<option value="${k}"${h.pet===k?" selected":""}${a.L>h.L?" disabled":""}>${a.n} — ${meta.freeGear?"free":druid?"1gp food":a.p+"gp"}</option>`).join("");
+  const a=h.pet&&ANIMALS[h.pet];
+  const stat = (x)=>`<span class="petstat">${x.n}: L${x.L}, Life ${x.life}, Attack <b>${diceStr("d6",x.atk)}</b>, Defense <b>${diceStr("d6",x.def+(x===ANIMALS.warhound&&h.dogArmor?1:0))}</b>. ${esc(x.note)}</span>`;
+  return `<div class="sec"><h3>Animals <span class="aside">${druid?"companion comes freely (1gp of food)":"one companion plus a mount"}</span></h3>
+    <div class="pet"><label for="pet${i}">Companion</label><select id="pet${i}" data-act="pet" data-i="${i}">${opts}</select>
+    ${a?stat(a):""}
+    ${h.pet==="warhound"?`<label class="check" style="grid-column:1/-1;padding:0"><input type="checkbox" data-act="dogarmor" data-i="${i}"${h.dogArmor?" checked":""}> Dog armor, +1 Defense (50gp)</label>`:""}
+    <label for="mount${i}">Mount</label><select id="mount${i}" data-act="mount" data-i="${i}"><option value="">None</option><option value="warhorse"${h.mount?" selected":""}>Warhorse — ${meta.freeGear?"free":"30gp"}</option></select>
+    ${h.mount?stat(WARHORSE):""}</div></div>`;
+}
+
+function sheetHTML(h, idx, anim){
+  const c=byId[h.cls], k=computed(h), gl=goldLeft(h);
+  const classOpts = `<optgroup label="Core classes">${CLASSES.filter(x=>x.core).map(x=>`<option value="${x.id}"${x.id===h.cls?" selected":""}>${x.name}</option>`).join("")}</optgroup>
+    <optgroup label="More classes">${CLASSES.filter(x=>!x.core).map(x=>`<option value="${x.id}"${x.id===h.cls?" selected":""}>${x.name}</option>`).join("")}</optgroup>`;
+  const gearOpts = c.gear.length>1 ? `<div class="gearopts" role="radiogroup" aria-label="Starting gear option">${c.gear.map((g,gi)=>`<label><input type="radio" name="gear${idx}" data-act="gear" data-i="${idx}" value="${gi}"${gi===h.gear?" checked":""}> ${esc(g.l)}</label>`).join("")}</div>` : "";
+  const fc=foodCount(h);
+  const kitList = kitItems(h).map(x=>x.n).join(", ") + (h.food?`, ${fc - [...h.bought,...h.free].filter(x=>x==="ration").length} Food rations`:"");
+  const weapons = k.weapons.map(w=>`<span>${esc(w.n)} <b>${diceStr(k.die,w.b)}</b></span>`).join("");
+  const traitBlocks = h.traits.map((t,ti)=>`
+    <div class="traitpick">
+      <select data-act="trait" data-i="${idx}" data-t="${ti}" aria-label="Trait ${ti+1}">
+        ${c.traits.map((tr,j)=>`<option value="${j}"${j===t?" selected":""}>${j+1}. ${esc(tr[0])}</option>`).join("")}
+        <option value="-1"${t===-1?" selected":""}>No trait</option>
+      </select>
+      <button class="iconbtn" data-act="rolltrait" data-i="${idx}" data-t="${ti}">Roll d6</button>
+    </div>
+    ${t>=0?`<p class="traittext">${esc(c.traits[t][1])}</p>`:`<p class="traittext"><em>Traits are optional.</em></p>`}`).join("");
+  let spells="";
+  if(c.spells){
+    const n=slotCount(h);
+    const sel = si => `<select data-act="spell" data-i="${idx}" data-s="${si}" aria-label="Spell slot ${si+1}">${c.spells.list.map(s=>`<option${s===h.spells[si]?" selected":""}>${esc(s)}</option>`).join("")}</select>`;
+    spells = `<div class="sec"><h3>${c.spells.single?"Chosen spell":"Spell slots"} <span class="aside">${n} slot${n>1?"s":""}${c.spells.single?", one spell":""}</span>
+      <button class="iconbtn" data-act="rollspells" data-i="${idx}">Random</button></h3>
+      <div class="slots">${c.spells.single?sel(0):Array.from({length:n},(_,si)=>sel(si)).join("")}</div></div>`;
+  }
+  const sworn = c.sworn ? `<div class="sec"><h3>Sworn Enemy</h3><div class="slots"><select data-act="sworn" data-i="${idx}" aria-label="Sworn enemy">${SWORN.map(s=>`<option${s===h.sworn?" selected":""}>${s}</option>`).join("")}</select></div></div>` : "";
+  const foodDice = h.food ? ` <span class="aside">rations:</span> <span class="dice">${h.food.map(v=>die(v,anim)).join("")}</span>` : "";
+  const T=k.T;
+  const lifeNote = `${c.life}+L${(k.life!==c.life+h.L)?" +trait":""}`;
+  const tierNote = T>1 ? ` <span class="tier">${TIER_NAME[T]} Tier — ${k.die}, explodes on ${({8:7,10:8,12:9,20:10})[TIER_DIE[T]]}+</span>` : ` <span class="tier">Basic Tier</span>`;
+  return `<article class="sheet" aria-label="Hero ${idx+1}">
+    <div class="sheet-head">
+      <div class="namebox"><input value="${esc(h.name)}" data-act="name" data-i="${idx}" aria-label="Hero name"><button class="iconbtn" data-act="rename" data-i="${idx}">New name</button></div>
+      <span class="lvlctl"><button class="iconbtn" data-act="lvdown" data-i="${idx}" aria-label="Lower level"${h.L<=1?" disabled":""}>−</button><span class="lv">Level ${h.L}</span><button class="iconbtn" data-act="lvup" data-i="${idx}" aria-label="Raise level"${h.L>=20?" disabled":""}>+</button></span>
+      <div class="classrow">
+        <select data-act="cls" data-i="${idx}" aria-label="Class">${classOpts}</select>
+        <button class="iconbtn" data-act="reroll" data-i="${idx}">Reroll hero</button>
+        <span class="page">p. ${c.page}${c.rare?", rare":""}</span>${tierNote}
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="k">Life</span><span class="v">${k.life}</span><span class="n">${lifeNote}</span></div>
+      <div class="stat"><span class="k">Attack</span><span class="v">${diceStr(k.die,k.weapons[0].b)}</span><span class="n">${esc(k.weapons[0].n)}</span></div>
+      <div class="stat"><span class="k">Defense</span><span class="v">${diceStr(k.die,k.defense)}</span><span class="n">class + armor</span></div>
+      <div class="stat"><span class="k">Stealth</span><span class="v">${esc(k.stealth)}</span><span class="n">with gear</span></div>
+      <div class="stat"><span class="k">Saves as</span><span class="v" style="font-size:17px">${esc(c.saves)}</span></div>
+    </div>
+    ${xpBox(h,idx)}
+    <div class="sec">
+      <h3>Gear</h3>${gearOpts}
+      <div class="items">${esc(kitList)}</div>
+      ${boughtHTML(h,idx)}
+      <div class="weapons" aria-label="Attack rolls by weapon">${weapons}</div>
+      ${shopHTML(h,idx)}
+    </div>
+    <div class="sec">
+      <h3>Gold <span class="aside">started with ${c.gold}d6</span> <button class="iconbtn" data-act="rollgold" data-i="${idx}">Reroll</button></h3>
+      <div class="goldrow"><span class="dice">${h.gold.map(v=>die(v,anim)).join("")}</span><span class="total">${gl} gp left</span><span class="aside">of ${startGold(h)+h.goldAdj}</span>${foodDice}</div>
+    </div>
+    ${petHTML(h,idx)}
+    <div class="sec"><h3>${(c.traitCount||1)>1?"Traits":"Trait"} <span class="aside">${(c.traitCount||1)>1?"pick 2 or roll twice":"pick 1 or roll d6"}</span></h3>${traitBlocks}</div>
+    <div class="sec"><h3>Class features</h3><ul class="feat">${c.feat(h,h.L,T).map(f=>`<li>${esc(f)}</li>`).join("")}${h.L>=5?`<li><em>Expert Tier: advanced skills and the d8 Tier die come from Four Against the Abyss.</em></li>`:""}</ul></div>
+    ${spells}${sworn}
+    <div class="limits"><b>Armor:</b> ${esc(c.armor)}. <b>Weapons:</b> ${esc(c.weapons)}. <b>Magic:</b> ${esc(c.magic)}.</div>
+    <textarea class="notes" data-act="notes" data-i="${idx}" aria-label="Notes" placeholder="Notes, loot, Clues, Madness…">${esc(h.notes||"")}</textarea>
+  </article>`;
+}
+
+const ROLES = [
+  {n:"Muscle",ids:["warrior","barbarian","dwarf","paladin","ranger","assassin","elf","bulwark"]},
+  {n:"Healing",ids:["cleric","paladin"]},
+  {n:"Magic",ids:["wizard","elf","illusionist","druid","gnome"]},
+  {n:"Traps & locks",ids:["rogue","gnome","assassin","kukla"]},
+  {n:"Stealth",ids:["rogue","halfling","acrobat","elf","ranger"]},
+];
+function renderCheck(){
+  const ids=party.map(h=>h.cls);
+  const roles = ROLES.map(r=>{const yes=ids.some(i=>r.ids.includes(i));return `<span class="role ${yes?"yes":"no"}"><span class="mark">${yes?"✓":"✗"}</span>${r.n}</span>`}).join("");
+  const warns=[];
+  for(const c of CLASSES.filter(c=>c.rare)) if(ids.filter(i=>i===c.id).length>1) warns.push(`Only one ${c.name.toLowerCase()} allowed per party.`);
+  if(ids.filter(i=>i==="dwarf").length>=2) warns.push("Two or more dwarves: the party can’t Bribe.");
+  const hcl = Math.max(...party.map(h=>h.L));
+  const gold = party.reduce((s,h)=>s+goldLeft(h),0);
+  document.getElementById("partyCheck").innerHTML = `<strong>Party mix</strong>${roles}<span class="role">HCL <span class="hand" style="font-weight:700">${hcl}</span></span><span class="role">Gold left: <span class="hand" style="color:var(--red);font-weight:700">${gold} gp</span></span>${warns.map(w=>`<span class="warning">${w}</span>`).join("")}`;
+}
+function renderSettings(){
+  document.getElementById("xpSystem").value=meta.xp;
+  document.getElementById("freeGear").checked=!!meta.freeGear;
+  document.getElementById("xpHelp").textContent=XP_HELP[meta.xp];
+  const enc=document.getElementById("encCounter");
+  if(meta.xp==="classical"||meta.xp==="slower"){
+    enc.innerHTML=`Minor Foe encounters <span class="hand" style="font-weight:700">${meta.minor}/10</span> <button class="iconbtn" id="encPlus">+1 encounter</button>${meta.xp==="classical"&&meta.banked?` <span class="warning">${meta.banked} XP roll${meta.banked>1?"s":""} to assign</span>`:""}`;
+  } else enc.innerHTML="";
+}
+let openShops=new Set();
+function render(anim){
+  document.querySelectorAll("details.shop").forEach(dt=>{ const i=+dt.dataset.i; dt.open?openShops.add(i):openShops.delete(i); });
+  const y=window.scrollY;
+  document.getElementById("sheets").innerHTML = party.map((h,i)=>sheetHTML(h,i,anim)).join("");
+  renderCheck(); renderSettings();
+  window.scrollTo(0,y);
+}
+function renderRoster(){
+  const r=load(ROSTER)||[]; const el=document.getElementById("roster");
+  if(!r.length){ el.innerHTML=`<li class="empty">Saved parties appear here. They stay in this browser only.</li>`; return; }
+  el.innerHTML = r.map((p,i)=>`<li><span class="who">${p.party.map(h=>`${esc(h.name)} (L${h.L||1} ${byId[h.cls].name})`).join(", ")}</span><button class="iconbtn" data-r="load" data-ri="${i}">Load</button><button class="iconbtn" data-r="del" data-ri="${i}">Delete</button></li>`).join("");
+}
+
+/* ================= Markdown ================= */
+function toMarkdown(){
+  return "# 4AD Party\n\n" + party.map(h=>{
+    const c=byId[h.cls], k=computed(h);
+    const traits=h.traits.filter(t=>t>=0).map(t=>`${c.traits[t][0]} — ${c.traits[t][1]}`);
+    const gear=[...kitItems(h).map(x=>x.n), ...h.bought.map(id=>SHOP_BY[id].n), ...h.free.map(id=>SHOP_BY[id].n)];
+    let s=`## ${h.name}, L${h.L} ${c.name}\n\n- **Life:** ${k.life}\n- **Defense:** ${diceStr(k.die,k.defense)}\n- **Stealth:** ${k.stealth}\n- **Saves as:** ${c.saves}\n- **Attack:** ${k.weapons.map(w=>`${w.n} ${diceStr(k.die,w.b)}`).join("; ")}\n- **Gear:** ${gear.join(", ")}${h.food?`; ${foodCount(h)} Food rations total`:""}\n- **Gold:** ${goldLeft(h)} gp\n`;
+    if(h.pet){const a=ANIMALS[h.pet]; s+=`- **Companion:** ${a.n} (L${a.L}, Life ${a.life}, Atk ${sgn(a.atk)}, Def ${sgn(a.def+(h.pet==="warhound"&&h.dogArmor?1:0))})\n`;}
+    if(h.mount) s+=`- **Mount:** Warhorse (L2, Life 3, Atk +1, Def +1)\n`;
+    if(traits.length) s+=`- **Trait${traits.length>1?"s":""}:** ${traits.join("; ")}\n`;
+    if(c.spells) s+=`- **Spells:** ${c.spells.single?h.spells[0]+` (${h.spells.length} slot${h.spells.length>1?"s":""})`:h.spells.join(", ")}\n`;
+    if(c.sworn) s+=`- **Sworn Enemy:** ${h.sworn}\n`;
+    if(meta.xp==="oldschool"||meta.xp==="slower") s+=`- **XP:** ${h.xp}\n`;
+    s+=`- **Features:** ${c.feat(h,h.L,k.T).join("; ")}\n`;
+    if(h.notes) s+=`- **Notes:** ${h.notes}\n`;
+    return s;
+  }).join("\n");
+}
+
+/* ================= Events ================= */
+const toastEl=document.getElementById("toast");
+function toast(m){toastEl.textContent=m;toastEl.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>toastEl.classList.remove("show"),2400)}
+
+function buy(i,id){
+  const h=party[i], x=SHOP_BY[id];
+  const why=canUse(h,x); if(why){toast(why);return false;}
+  if(meta.freeGear){ h.free.push(id); return true; }
+  return pay(i,x.p,()=>h.bought.push(id), x.n);
+}
+// pay from this hero; borrow the shortfall from the richest allies
+function pay(i,cost,commit,label){
+  const h=party[i]; let short=cost-goldLeft(h);
+  if(short>0){
+    const others=party.map((o,j)=>({j,g:goldLeft(o)})).filter(o=>o.j!==i&&o.g>0).sort((a,b)=>b.g-a.g);
+    if(others.reduce((s,o)=>s+o.g,0)<short){ toast(`Not enough gold in the party for ${label}`); return false; }
+    const lenders=[];
+    for(const o of others){ if(short<=0) break; const t=Math.min(o.g,short); party[o.j].goldAdj-=t; h.goldAdj+=t; short-=t; lenders.push(`${t}gp from ${party[o.j].name}`); }
+    toast(`Borrowed ${lenders.join(", ")}`);
+  }
+  commit(); return true;
+}
+
+const sheetsEl=document.getElementById("sheets");
+sheetsEl.addEventListener("click",e=>{
+  const b=e.target.closest("button[data-act]"); if(!b) return;
+  const i=+b.dataset.i, h=party[i], c=byId[h.cls], a=b.dataset.act; let anim=false;
+  if(a==="rename") h.name=randName();
+  else if(a==="reroll"){ party[i]=newHero(randomClasses(1, party.filter((_,j)=>j!==i).map(x=>x.cls))[0]); anim=true; }
+  else if(a==="rollgold"){ h.gold=rollDice(c.gold); if(c.food) h.food=rollDice(c.food.n,c.food.s); anim=true;
+    if(goldLeft(h)<0) toast("New gold total is less than what this hero spent — return some items."); }
+  else if(a==="rolltrait"){ const ti=+b.dataset.t; let r; do{ r=d(6)-1 }while(h.traits.some((x,j)=>j!==ti&&x===r)); h.traits[ti]=r; fillSpells(h,false); anim=true; }
+  else if(a==="rollspells") fillSpells(h,true);
+  else if(a==="lvup") setLevel(i,h.L+1,false);
+  else if(a==="lvdown"){ setLevel(i,h.L-1,false); if(h.pet&&ANIMALS[h.pet].L>h.L){ h.pet=null; toast("Companion removed: it can’t outrank its master."); } }
+  else if(a==="xproll"){
+    if(meta.banked>0) meta.banked--;
+    const r=d(6), ok=r===6||r>h.L;
+    h.lastRoll = `Rolled ${r} — ${ok?`level up to L${h.L+1}!`:"no level this time."}`;
+    if(ok) setLevel(i,h.L+1,true);
+  }
+  else if(a==="slowsure"){ setLevel(i,h.L+1,true); h.lastRoll=`Now L${h.L}.`; }
+  else if(a==="xpadd"){ const inp=b.parentElement.querySelector('[data-act="xpamt"]'); const v=Math.max(0,parseInt(inp.value,10)||0); h.xp+=v; }
+  else if(a==="xpspend"){ const cost=(tierOf(h.L)+2)*100; if(h.xp>=cost&&!blockedJustLevelled(i)){ h.xp-=cost; setLevel(i,h.L+1,true); h.lastRoll=`Spent ${cost} XP — now L${h.L}.`; } }
+  else if(a==="xpplus") h.xp++;
+  else if(a==="xpminus") h.xp=Math.max(0,h.xp-1);
+  else if(a==="xpslower"){
+    const need=h.L+1; const ex=Math.max(0,parseInt(b.parentElement.querySelector('[data-act="xpextra"]').value,10)||0);
+    if(h.xp<need+ex){ toast(`Needs ${need+ex} XP banked`); return; }
+    const T=tierOf(h.L), newT=tierOf(need), train=newT>T?TRAINING[newT]:0;
+    if(train && goldLeft(h)+party.reduce((s,o,j)=>s+(j!==i?Math.max(0,goldLeft(o)):0),0)<train){ toast(`Training to ${TIER_NAME[newT]} Tier costs ${train}gp`); return; }
+    h.xp-=need+ex; const r=d(6), tot=r+ex, ok=r===6||tot>h.L;
+    h.lastRoll=`Rolled ${r}${ex?` +${ex}`:""} = ${tot} — ${ok?`level up to L${need}!`:"no level; the XP is spent."}`;
+    if(ok){ if(train) pay(i,train,()=>{h.goldAdj-=train},"training"); setLevel(i,need,true); }
+  }
+  else if(a==="buy"){ if(!buy(i,b.dataset.id)) return; }
+  else if(a==="unbuy"){ const list=b.dataset.free?h.free:h.bought; const k=list.lastIndexOf(b.dataset.id); if(k>=0) list.splice(k,1); }
+  else return;
+  save(); render(anim);
+});
+sheetsEl.addEventListener("change",e=>{
+  const t=e.target, a=t.dataset.act; if(!a) return;
+  const i=+t.dataset.i, h=party[i];
+  if(a==="cls"){ const keep=h.name; party[i]=newHero(t.value); party[i].name=keep; party[i].L=h.L; fillSpells(party[i],true); }
+  else if(a==="gear") h.gear=+t.value;
+  else if(a==="trait"){ const ti=+t.dataset.t, v=+t.value; if(v>=0&&h.traits.some((x,j)=>j!==ti&&x===v)){ toast("That trait is already taken — halflings need two different traits."); render(); return; } h.traits[ti]=v; fillSpells(h,false); }
+  else if(a==="spell"){ const si=+t.dataset.s; if(byId[h.cls].spells.single) h.spells=h.spells.map(()=>t.value); else h.spells[si]=t.value; }
+  else if(a==="sworn") h.sworn=t.value;
+  else if(a==="pet"){
+    const v=t.value||null, prev=h.pet, prevFree=h.petFree, prevDog=[h.dogArmor,h.dogFree];
+    h.pet=null; h.petFree=false; if(prev==="warhound"){ h.dogArmor=false; h.dogFree=false; }
+    if(v){
+      if(meta.freeGear){ h.pet=v; h.petFree=true; }
+      else { const cost=byId[h.cls].druidPet?1:ANIMALS[v].p; if(!pay(i,cost,()=>{h.pet=v},ANIMALS[v].n)){ h.pet=prev; h.petFree=prevFree; if(prev==="warhound"){ [h.dogArmor,h.dogFree]=prevDog; } } }
+    }
+  }
+  else if(a==="mount"){ if(t.value){ if(meta.freeGear){ h.mount="warhorse"; h.mountFree=true; } else if(!pay(i,WARHORSE.p,()=>{h.mount="warhorse"; h.mountFree=false},"a warhorse")) h.mount=null; } else { h.mount=null; h.mountFree=false; } }
+  else if(a==="dogarmor"){ if(t.checked){ if(meta.freeGear){ h.dogArmor=true; h.dogFree=true; } else if(!pay(i,50,()=>{h.dogArmor=true; h.dogFree=false},"dog armor")) h.dogArmor=false; } else { h.dogArmor=false; h.dogFree=false; } }
+  else return;
+  save(); render();
+});
+sheetsEl.addEventListener("input",e=>{
+  const t=e.target, a=t.dataset.act; if(a!=="name"&&a!=="notes") return;
+  party[+t.dataset.i][a]=t.value; save();
+});
+sheetsEl.addEventListener("toggle",e=>{ const dt=e.target; if(dt.matches&&dt.matches("details.shop")){ const i=+dt.dataset.i; dt.open?openShops.add(i):openShops.delete(i);} },true);
+
+document.getElementById("settings").addEventListener("click",e=>{
+  if(e.target.id!=="encPlus") return;
+  meta.minor++;
+  if(meta.minor>=10){ meta.minor=0;
+    if(meta.xp==="classical"){ meta.banked++; toast("10 Minor Foe encounters: 1 XP roll to assign"); }
+    else { toast("10 Minor Foe encounters: 1 XP — add it to a hero’s bank"); }
+  }
+  save(); renderSettings();
+});
+document.getElementById("xpSystem").addEventListener("change",e=>{ meta.xp=e.target.value; party.forEach(h=>h.lastRoll=null); save(); render(); });
+document.getElementById("freeGear").addEventListener("change",e=>{ meta.freeGear=e.target.checked; save(); render(); toast(meta.freeGear?"New equipment and animals won’t cost gold":"New equipment costs gold again"); });
+document.getElementById("rollParty").addEventListener("click",rollParty);
+document.getElementById("coreOnly").addEventListener("change",e=>{coreOnly=e.target.checked;save()});
+document.getElementById("printBtn").addEventListener("click",()=>window.print());
+document.getElementById("copyMd").addEventListener("click",async()=>{
+  const md=toMarkdown();
+  try{ await navigator.clipboard.writeText(md); toast("Copied party as Markdown"); }
+  catch(e){ const ta=document.createElement("textarea"); ta.value=md; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy");toast("Copied party as Markdown")}catch(_){toast("Copy blocked by the browser")} ta.remove(); }
+});
+document.getElementById("saveParty").addEventListener("click",()=>{
+  const r=load(ROSTER)||[]; r.unshift({party:JSON.parse(JSON.stringify(party)),meta:{...meta},at:Date.now()}); store(ROSTER,r.slice(0,30)); renderRoster(); toast("Party saved");
+});
+document.getElementById("roster").addEventListener("click",e=>{
+  const b=e.target.closest("[data-r]"); if(!b) return;
+  const r=load(ROSTER)||[], i=+b.dataset.ri;
+  if(b.dataset.r==="load"&&r[i]){ party=r[i].party.map(upgrade); if(r[i].meta) meta={...meta,...r[i].meta}; save(); render(); toast("Party loaded"); window.scrollTo({top:0,behavior:"smooth"}); }
+  if(b.dataset.r==="del"){ r.splice(i,1); store(ROSTER,r); renderRoster(); }
+});
+
+/* ================= Boot ================= */
+const saved=load(KEY)||load(OLDKEY);
+if(saved&&Array.isArray(saved.party)&&saved.party.length===4&&saved.party.every(h=>byId[h.cls])){
+  party=saved.party.map(upgrade); coreOnly=!!saved.coreOnly; if(saved.meta) meta={...meta,...saved.meta};
+  party.forEach(h=>{ if(typeof h.gold==="number") h.gold=[h.gold]; });
+} else { coreOnly=true; party=randomClasses().map(newHero); save(); }
+document.getElementById("coreOnly").checked=coreOnly;
+render(true); renderRoster();
+</script>
+</body>
+</html>
