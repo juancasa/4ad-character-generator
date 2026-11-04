@@ -63,6 +63,9 @@ Graph-paper "printed form filled in pencil" look.
 - Dice render as pip faces (`.die`) with a short tumble animation, disabled under `prefers-reduced-motion`.
 - Keep the print stylesheet working (sheets print two per row; controls hidden).
 
+## Hosting
+- GitHub Pages from `main` at https://4ad.macondo.info/ (`CNAME` file; DNS CNAME `4ad` → `juancasa.github.io` at domain.com). Don’t delete `CNAME`. Pushing to `main` deploys.
+
 ## Testing
 - `python3 tests/smoke.py` runs a Playwright smoke test: it cycles every class through levels, buys gear, adds companions, uses each XP system and toggles free equipment, failing on any page error.
 - Setup: `pip install playwright && playwright install chromium`.
@@ -74,6 +77,5 @@ Graph-paper "printed form filled in pencil" look.
 - Commit messages: short imperative summary, e.g. `Add equipment shop`.
 
 ## Ideas not yet built
-- Hosting on GitHub Pages or the homelab.
 - Import a party from Markdown.
 - More XP automation (Major Foes, Secrets, Final Boss counters).

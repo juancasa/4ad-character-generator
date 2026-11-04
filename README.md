@@ -2,6 +2,8 @@
 
 A single-page party builder for **Four Against Darkness** (Expanded Edition) by Andrea Sfiligoi / Ganesha Games.
 
+**Use it online: https://4ad.macondo.info/**
+
 Open `index.html` in a browser — no build step, no server, no dependencies (Google Fonts load if online, with system font fallbacks).
 
 ## Features
@@ -13,7 +15,8 @@ Open `index.html` in a browser — no build step, no server, no dependencies (Go
 - **Animal companions** — hawk, owl, peacock, warhound (plus dog armor), wildcat, crow, and a warhorse mount; druids get theirs for 1gp of food.
 - **Levelling** — manual level controls plus all four XP systems: Classical, Slow and Sure, Old School tally, and Slower Advancement. Stats, slots and resources scale with level; Tier dice change at L5/10/15/20.
 - **Party check** — roles covered, HCL, gold left, rule warnings.
-- **Save, export, print** — parties are saved in browser `localStorage`; copy a party as Markdown; print-friendly sheets.
+- **Play tracking** — current Life, Madness and Clues on each sheet.
+- **Save, export, print** — parties are saved in browser `localStorage`; export/import a party as JSON to back it up or move it to another browser; copy a party as Markdown; print-friendly sheets.
 
 ## Notes
 
@@ -23,4 +26,6 @@ Open `index.html` in a browser — no build step, no server, no dependencies (Go
 
 ## Hosting
 
-Works as-is on GitHub Pages: Settings → Pages → deploy from the `main` branch, root folder.
+Served by GitHub Pages from the `main` branch (root folder) at **https://4ad.macondo.info/**. The `CNAME` file holds the custom domain; DNS has a CNAME record `4ad.macondo.info → juancasa.github.io`. Every push to `main` redeploys.
+
+Saved parties live in each browser’s `localStorage` for one web address, so use Export/Import JSON to move parties between addresses or browsers.
