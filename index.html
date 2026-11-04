@@ -172,6 +172,13 @@ footer{margin-top:28px;font-size:13px;color:var(--soft)}
 .lvlctl{display:flex;align-items:center;gap:4px;white-space:nowrap}
 .lvlctl .lv{font-weight:800;font-size:15px}
 .lvlctl .tier{font-size:13px;color:var(--soft);font-style:italic}
+.track{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;font-size:15px;margin:-4px 0 6px}
+.track .ctr{display:flex;align-items:center;gap:4px;white-space:nowrap}
+.track .val{font-family:"Kalam",cursive;font-weight:700;font-size:19px;color:var(--pencil);min-width:1.6em;text-align:center}
+.track .val.low{color:var(--red)}
+.track .of{color:var(--soft);font-size:14px}
+.track .note{flex-basis:100%;font-size:13px;font-style:italic;color:var(--soft);margin-top:-2px}
+.track .note .warning{font-size:13px}
 .xpbox{border:1.2px dashed var(--line);padding:6px 8px;margin-top:6px;font-size:15px}
 .xpbox .row{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
 .xpbox input[type=number]{width:5.5em;border:1px solid var(--line);background:var(--card);border-radius:3px;padding:1px 4px}
@@ -195,7 +202,7 @@ details.shop[open] summary{border-bottom:1px solid var(--line)}
 .pet select{border:1px solid var(--line);background:var(--card);border-radius:3px;padding:1px 4px;cursor:pointer;max-width:100%}
 .petstat{grid-column:1/-1;font-size:14px;color:var(--pencil)}
 .petstat b{font-family:"Kalam",cursive;color:var(--red)}
-@media print{.settings,details.shop,.xpbox button,.lvlctl button{display:none!important}}
+@media print{.settings,details.shop,.xpbox button,.lvlctl button,.track button{display:none!important}}
 </style>
 </head>
 <body>
@@ -340,7 +347,7 @@ const CLASSES = [
   feat:(h,L)=>["+L to Defense rolls",`+L (${sgn(L)}) Attack vs outnumbered Minor Foes (when PCs outnumber them)`,"+L to Saves vs Traps and to pick locks"],
   traits:[["Knife Fighter","+Tier Attack with daggers and throwing knives."],["Evasion","Once per adventure, automatically pass a Save to avoid damage or a bad effect."],["Shadow-walker","+Tier to Stealth rolls."],["Delicate Touch","+Tier to lock-picking and disarming Traps."],["Street Thug","+1 Life; may use hand weapons and starts with one."],["Backstabber","Your outnumbered bonus also works vs Major Foes."]],
   tmod:{0:(L,T)=>({atkLight:T}),2:(L,T)=>({stealth:T}),4:()=>({life:1,addItem:HW,allowW:["hand"]})}},
- {id:"wizard",name:"Wizard",core:true,page:64,life:2,saves:"Wizard",gold:4,
+ {id:"wizard",name:"Wizard",core:true,page:64,life:2,saves:"Wizard",gold:4,sane:1,
   atk:()=>0, def:()=>0, stealth:()=>0,
   allow:{ar:[],w:["light","sling"]},
   armor:"None",weapons:"Light weapon, sling",magic:"Any not class-restricted; +L casting from scrolls",
@@ -467,14 +474,14 @@ function newHero(clsId){
   const c = byId[clsId], tc = c.traitCount||1, traits=[];
   while(traits.length<tc){ const r=d(6)-1; if(!traits.includes(r)) traits.push(r); }
   const h = {cls:clsId,name:randName(),L:1,gear:0,traits,gold:rollDice(c.gold),food:null,spells:[],sworn:null,notes:"",
-             bought:[],goldAdj:0,pet:null,mount:null,dogArmor:false,xp:0,lastRoll:null,free:[],petFree:false,mountFree:false,dogFree:false};
+             bought:[],goldAdj:0,pet:null,mount:null,dogArmor:false,xp:0,lastRoll:null,free:[],petFree:false,mountFree:false,dogFree:false,hp:null,madness:0,clues:0};
   if(c.food) h.food = rollDice(c.food.n, c.food.s);
   if(c.sworn) h.sworn = pick(SWORN);
   fillSpells(h, true);
   return h;
 }
 function upgrade(h){ // older saves
-  return Object.assign({L:1,bought:[],goldAdj:0,pet:null,mount:null,dogArmor:false,xp:0,lastRoll:null,free:[],petFree:false,mountFree:false,dogFree:false}, h);
+  return Object.assign({L:1,bought:[],goldAdj:0,pet:null,mount:null,dogArmor:false,xp:0,lastRoll:null,free:[],petFree:false,mountFree:false,dogFree:false,hp:null,madness:0,clues:0}, h);
 }
 function tmods(h){
   const c=byId[h.cls], T=tierOf(h.L);
@@ -525,7 +532,7 @@ function canUse(h, item){
 function computed(h){
   const c=byId[h.cls], L=h.L, T=tierOf(L), m=tmods(h), its=allItems(h);
   const die = `d${TIER_DIE[T]}`;
-  const life = L + c.life + m.life;
+  const life = maxLife(h);
   const armor = Math.max(0,...its.map(x=>x.a||0));
   const shield = its.some(x=>x.s)?1:0;
   const defense = c.def(L,T) + armor + shield + m.def;
@@ -548,6 +555,11 @@ function computed(h){
   weapons.push({n:"Unarmed",b:ub});
   return {L,T,die,life,defense,stealth,weapons,its};
 }
+// play tracking: hp null = at full Life (follows max Life when levelling)
+const maxLife = h => h.L + byId[h.cls].life + tmods(h).life;
+const curLife = h => { const m=maxLife(h); return h.hp==null ? m : Math.max(0,Math.min(h.hp,m)); };
+function setLife(h,v){ const m=maxLife(h); v=Math.max(0,Math.min(v,m)); h.hp = v>=m ? null : v; }
+const madLimit = h => h.L + (byId[h.cls].sane||0); // insane when Madness exceeds this
 const diceStr = (die,b) => `${die}${b?sgn(b):""}`;
 
 /* ================= State ================= */
@@ -578,7 +590,7 @@ function setLevel(i, L, viaXP){
   if(viaXP && h.L>old) meta.last=i;
   return h.L!==old;
 }
-function aliveCount(){ return party.length; }
+function aliveCount(){ return party.filter(h=>curLife(h)>0).length; }
 function blockedJustLevelled(i){ return meta.last===i && aliveCount()>1; }
 
 /* ================= Rendering ================= */
@@ -637,6 +649,19 @@ function petHTML(h,i){
     ${h.mount?stat(WARHORSE):""}</div></div>`;
 }
 
+function trackHTML(h,i){
+  const max=maxLife(h), cur=curLife(h), lim=madLimit(h), notes=[];
+  if(cur===0) notes.push(`<span class="warning">At 0 Life.</span>`);
+  if(h.madness>lim) notes.push(`<span class="warning">Madness above ${lim}: insane — runs off and is never seen again.</span>`);
+  else if(h.madness>0) notes.push(`Paranoid: can’t exchange equipment with allies. Insane above ${lim} Madness.`);
+  if(h.clues>=3) notes.push("3 Clues: can reveal a Secret.");
+  const ctr=(lbl,act,val,extra,cls)=>`<span class="ctr">${lbl} <button class="iconbtn" data-act="${act}down" data-i="${i}" aria-label="Lower ${lbl}"${val<=0?" disabled":""}>−</button><span class="val${cls?" "+cls:""}" aria-label="${lbl} ${val}">${val}</span><button class="iconbtn" data-act="${act}up" data-i="${i}" aria-label="Raise ${lbl}"${extra||""}>+</button></span>`;
+  return `<div class="track" aria-label="Play tracking">
+    ${ctr("Life","hp",cur,cur>=max?" disabled":"",cur<max?"low":"")}<span class="of">of ${max}</span>${cur<max?`<button class="iconbtn" data-act="hpfull" data-i="${i}">Full</button>`:""}
+    ${ctr("Madness","mad",h.madness,"",h.madness>0?"low":"")}
+    ${ctr("Clues","clue",h.clues)}
+    ${notes.length?`<span class="note">${notes.join(" ")}</span>`:""}</div>`;
+}
 function sheetHTML(h, idx, anim){
   const c=byId[h.cls], k=computed(h), gl=goldLeft(h);
   const classOpts = `<optgroup label="Core classes">${CLASSES.filter(x=>x.core).map(x=>`<option value="${x.id}"${x.id===h.cls?" selected":""}>${x.name}</option>`).join("")}</optgroup>
@@ -684,6 +709,7 @@ function sheetHTML(h, idx, anim){
       <div class="stat"><span class="k">Stealth</span><span class="v">${esc(k.stealth)}</span><span class="n">with gear</span></div>
       <div class="stat"><span class="k">Saves as</span><span class="v" style="font-size:17px">${esc(c.saves)}</span></div>
     </div>
+    ${trackHTML(h,idx)}
     ${xpBox(h,idx)}
     <div class="sec">
       <h3>Gear</h3>${gearOpts}
@@ -751,7 +777,7 @@ function toMarkdown(){
     const c=byId[h.cls], k=computed(h);
     const traits=h.traits.filter(t=>t>=0).map(t=>`${c.traits[t][0]} — ${c.traits[t][1]}`);
     const gear=[...kitItems(h).map(x=>x.n), ...h.bought.map(id=>SHOP_BY[id].n), ...h.free.map(id=>SHOP_BY[id].n)];
-    let s=`## ${h.name}, L${h.L} ${c.name}\n\n- **Life:** ${k.life}\n- **Defense:** ${diceStr(k.die,k.defense)}\n- **Stealth:** ${k.stealth}\n- **Saves as:** ${c.saves}\n- **Attack:** ${k.weapons.map(w=>`${w.n} ${diceStr(k.die,w.b)}`).join("; ")}\n- **Gear:** ${gear.join(", ")}${h.food?`; ${foodCount(h)} Food rations total`:""}\n- **Gold:** ${goldLeft(h)} gp\n`;
+    let s=`## ${h.name}, L${h.L} ${c.name}\n\n- **Life:** ${curLife(h)}/${k.life}\n- **Madness:** ${h.madness}\n- **Clues:** ${h.clues}\n- **Defense:** ${diceStr(k.die,k.defense)}\n- **Stealth:** ${k.stealth}\n- **Saves as:** ${c.saves}\n- **Attack:** ${k.weapons.map(w=>`${w.n} ${diceStr(k.die,w.b)}`).join("; ")}\n- **Gear:** ${gear.join(", ")}${h.food?`; ${foodCount(h)} Food rations total`:""}\n- **Gold:** ${goldLeft(h)} gp\n`;
     if(h.pet){const a=ANIMALS[h.pet]; s+=`- **Companion:** ${a.n} (L${a.L}, Life ${a.life}, Atk ${sgn(a.atk)}, Def ${sgn(a.def+(h.pet==="warhound"&&h.dogArmor?1:0))})\n`;}
     if(h.mount) s+=`- **Mount:** Warhorse (L2, Life 3, Atk +1, Def +1)\n`;
     if(traits.length) s+=`- **Trait${traits.length>1?"s":""}:** ${traits.join("; ")}\n`;
@@ -797,6 +823,13 @@ sheetsEl.addEventListener("click",e=>{
     if(goldLeft(h)<0) toast("New gold total is less than what this hero spent — return some items."); }
   else if(a==="rolltrait"){ const ti=+b.dataset.t; let r; do{ r=d(6)-1 }while(h.traits.some((x,j)=>j!==ti&&x===r)); h.traits[ti]=r; fillSpells(h,false); anim=true; }
   else if(a==="rollspells") fillSpells(h,true);
+  else if(a==="hpdown") setLife(h,curLife(h)-1);
+  else if(a==="hpup") setLife(h,curLife(h)+1);
+  else if(a==="hpfull") h.hp=null;
+  else if(a==="madup") h.madness++;
+  else if(a==="maddown") h.madness=Math.max(0,h.madness-1);
+  else if(a==="clueup") h.clues++;
+  else if(a==="cluedown") h.clues=Math.max(0,h.clues-1);
   else if(a==="lvup") setLevel(i,h.L+1,false);
   else if(a==="lvdown"){ setLevel(i,h.L-1,false); if(h.pet&&ANIMALS[h.pet].L>h.L){ h.pet=null; toast("Companion removed: it can’t outrank its master."); } }
   else if(a==="xproll"){
