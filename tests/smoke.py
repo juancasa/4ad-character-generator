@@ -1,5 +1,5 @@
 """Smoke test for index.html. Run: python3 tests/smoke.py"""
-import pathlib, sys
+import json, pathlib, sys
 from playwright.sync_api import sync_playwright
 
 PAGE = pathlib.Path(__file__).resolve().parent.parent / "index.html"
@@ -21,6 +21,14 @@ def main():
             for _ in range(5): pg.click('button[data-act=lvup][data-i="0"]')
             for _ in range(5): pg.click('button[data-act=lvdown][data-i="0"]')
 
+        # assassin picks any two starting weapons
+        pg.select_option('select[data-act=cls][data-i="3"]', 'assassin')
+        pg.select_option('select[data-act=gearpick][data-i="3"][data-p="0"]', 'two')
+        pg.select_option('select[data-act=gearpick][data-i="3"][data-p="1"]', 'rifle')
+        names = pg.evaluate("kitItems(party[3]).map(x=>x.n)")
+        assert 'Two-handed weapon' in names and 'Black powder rifle' in names, names
+        # old save with gear index 1 (hand weapon + bow) upgrades to picks
+        assert pg.evaluate("upgrade({cls:'assassin',gear:1}).picks.join()") == 'hand,bow'
         pg.select_option('select[data-act=cls][data-i="2"]', 'warrior')
         pg.check('#freeGear')
         pg.click('details.shop[data-i="2"] summary')
@@ -60,6 +68,23 @@ def main():
         while pg.is_enabled('button[data-act=hpdown][data-i="1"]'): pg.click('button[data-act=hpdown][data-i="1"]')
         assert pg.evaluate("curLife(party[1])") == 0
         pg.click('#copyMd')
+
+        # JSON export -> import round trip
+        before = pg.evaluate("JSON.stringify(party.map(h=>[h.cls,h.name,h.L,h.gold,h.bought,h.hp,h.madness,h.clues,h.spells,h.picks||null]))")
+        with pg.expect_download() as dl: pg.click('#exportJson')
+        path = dl.value.path(); data = json.loads(pathlib.Path(path).read_text())
+        assert data['app'] == '4ad-party-builder' and len(data['party']) == 4, data.keys()
+        pg.click('#rollParty')
+        pg.set_input_files('#importFile', path); pg.wait_for_timeout(300)
+        after = pg.evaluate("JSON.stringify(party.map(h=>[h.cls,h.name,h.L,h.gold,h.bought,h.hp,h.madness,h.clues,h.spells,h.picks||null]))")
+        assert before == after, (before, after)
+        assert pg.evaluate("(load(ROSTER)||[]).length") >= 1
+        # hostile / broken files are rejected or cleaned, never crash
+        bad = pathlib.Path(path).with_name('bad.json')
+        for txt in ['not json', '{"party":[1,2]}', json.dumps({'party':[{'cls':'warrior','name':'<img src=x onerror=alert(1)>','bought':['nope'],'pet':'dragon','L':99,'traits':[9]}]*4})]:
+            bad.write_text(txt); pg.set_input_files('#importFile', str(bad)); pg.wait_for_timeout(200)
+        assert pg.evaluate("party[0].L") == 20 and pg.evaluate("party[0].pet") is None
+        assert pg.query_selector('#sheets img') is None
         b.close()
 
     if errors:

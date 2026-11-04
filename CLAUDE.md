@@ -27,6 +27,7 @@ Inline `<style>`, then markup, then one `<script>`. Script sections, in order:
      - `atk(kind, L, T, itemName)` → class attack bonus for that weapon; `def(L,T)`; `stealth(L,T)` (number or display string)
      - `allow: {ar:[light|heavy|shield], w:[kinds]}` — shop restrictions
      - `gear: [{l:label, i:[items]}]` — starting-kit trade-in options
+     - `gearPick: {n, from:[shop ids], def:[ids]}` — free choice of starting weapons (assassin: any two); stored on the hero as `picks[]`
      - `spells: {list, slots(L), single?}` — `single` = one spell in every slot (gnome)
      - `feat(h, L, T)` → array of feature strings with level-scaled numbers
      - `traits: [[name, summary] ×6]`, `traitCount` (halfling = 2)
@@ -34,14 +35,14 @@ Inline `<style>`, then markup, then one `<script>`. Script sections, in order:
      - flags: `food`, `sworn`, `druidPet`, `nomagic`, `artificial`, `nomush`
 2. **Helpers** — dice, `sgn` (uses a real minus sign), `esc`, random names.
 3. **Hero model**
-   - Hero shape: `{cls,name,L,gear,traits[],gold[],food[]|null,spells[],sworn,notes,bought[],free[],goldAdj,pet,petFree,mount,mountFree,dogArmor,dogFree,xp,lastRoll,hp,madness,clues}`
+   - Hero shape: `{cls,name,L,gear,traits[],gold[],food[]|null,spells[],sworn,notes,bought[],free[],goldAdj,pet,petFree,mount,mountFree,dogArmor,dogFree,xp,lastRoll,hp,madness,clues,picks?}`
    - Play tracking: `hp` is current Life, `null` = full (so it follows max Life on level-up); `maxLife`, `curLife`, `setLife`. `madLimit` = L (+1 for classes with `sane:1`, i.e. wizard). `aliveCount` counts heroes above 0 Life.
    - `newHero`, `upgrade` (fills defaults for old saves), `tmods`, `slotCount`, `fillSpells`, `kitItems`, `allItems`, `spent`, `goldLeft`, `foodCount`, `canUse` (returns a reason string or null), `computed` (all derived stats).
    - Gold: `goldLeft = sum(gold dice) + goldAdj − spent`. Borrowing between heroes moves `goldAdj`. Items in `free[]` and animals flagged `*Free` cost nothing.
 4. **State** — `party` (4 heroes), `coreOnly`, `meta {xp, minor, last, banked, freeGear}`. Saved to `localStorage` key `4ad-party-v2` (reads `4ad-party-v1` too); roster under `4ad-roster-v1`.
 5. **Levels and XP** — four systems: `classical`, `slowsure`, `oldschool`, `slower`. `meta.last` = index of the hero who just levelled up via XP (they can't take the next XP unless they're alone). `TRAINING` gold costs at new Tiers (slower system).
 6. **Rendering** — string templates: `sheetHTML`, `xpBox`, `shopHTML`, `boughtHTML`, `petHTML`, `renderCheck` (party-role bar), `renderSettings`, `render(anim)` (keeps open shop `<details>` and scroll position).
-7. **Markdown export**, **events** (event delegation on `#sheets` via `data-act`), **boot**.
+7. **Markdown export**, **JSON export/import** (`toJSON`, `fromJSON`, `cleanHero`: imported files are untrusted, so every field is validated against the data and unknown values are dropped; the current party goes to the roster before an import replaces it), **events** (event delegation on `#sheets` via `data-act`), **boot**.
 
 When adding a class rule, prefer extending the data (`atk`, `tmod`, `feat`, `allow`) over special-casing in `computed`.
 
@@ -49,6 +50,8 @@ When adding a class rule, prefer extending the data (`atk`, `tmod`, `feat`, `all
 - Level range 1–20; the book covers Basic Tier (L1–4). From L5 the sheet notes that Expert skills come from *Four Against the Abyss*. Tier die changes with Tier.
 - Best armor counts (light and heavy don't stack); a shield adds +1. Shield and heavy armor each give −1 Stealth.
 - Conditional bonuses (cleric vs undead, rogue vs outnumbered Minor Foes, dwarf vs goblins, …) are listed as features, not added to the main numbers.
+- Bonuses tied to a specific weapon type the shop doesn’t model (rogue Knife Fighter: daggers; warrior Sword/Mace Training; dwarf Axe Mastery) stay in the trait text and aren’t added to Attack. Kukla’s +1 matches item names (dagger/knife/slashing).
+- Weapon lists follow the book strictly: rangers get no crossbows, rogues get no throwing stars.
 - Rare classes (Bulwark, Kukla, Mushroom Monk): one per party, enforced in random rolls and warned in the party bar. Two or more dwarves → warning that the party can't Bribe.
 - Druid companion costs 1gp; companions above the hero's level can't be chosen.
 - Unarmed: −2, except mushroom monk (hands count as light, then hand weapons from L5) and kukla (claws −1).
@@ -72,5 +75,5 @@ Graph-paper "printed form filled in pencil" look.
 
 ## Ideas not yet built
 - Hosting on GitHub Pages or the homelab.
-- Import a party from Markdown/JSON; JSON export.
+- Import a party from Markdown.
 - More XP automation (Major Foes, Secrets, Final Boss counters).
