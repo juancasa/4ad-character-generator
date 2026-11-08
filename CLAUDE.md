@@ -61,6 +61,9 @@ When adding a class rule, prefer extending the data (`atk`, `tmod`, `feat`, `all
 Graph-paper "printed form filled in pencil" look.
 - Fonts: **Alegreya** for printed labels, **Kalam** for handwritten values.
 - Color tokens on `:root` with a dark set under `@media (prefers-color-scheme: dark)` and `[data-theme]`: `--paper --grid --grid-strong --ink --pencil --soft --red --blue --card --line --ok --warn`. Red pencil is used for dice, gold and attack numbers.
+- Everything the player chooses looks filled in by pencil: selects are underlined blanks with Kalam values (global `select` style), checkboxes and radios are printed boxes with a pencil tick. Number controls are joined `.step` boxes (− value +).
+- Each hero card opens with a dark `.band` like the printed form's card headers: class select, page ref, Reroll, Level stepper. It uses `--ink` as background and `--card` as text, so it flips in dark mode.
+- Above the cards, `#partyRoll` shows each hero's Life, Attack and Defense side by side (links to `#hero-i`), followed by the party-mix boxes. File actions (Save, Markdown, JSON, Print) are quiet `.link` buttons in the header; “Roll a new party” is the only primary button.
 - Dice render as pip faces (`.die`) with a short tumble animation, disabled under `prefers-reduced-motion`.
 - **Print** renders `#printSheet` instead of the app: a one-page US Letter copy of the 4AD party sheet form (`rules/4AD_Party_Sheet_Letter.pdf`, gitignored), filled in by `renderPrint()` on `beforeprint`. Labels in Helvetica/Arial, values in Kalam. Per-adventure resources come from each class’s `uses(h,L,T)` → `[name, uses]` (≤3 → boxes, else a number); “Once per …” traits are detected from their summary text. Overflow from fixed lines goes into Conditions/Notes. The smoke test fails if any class at L1/5/20 overflows a card or the print spills onto a second page.
 

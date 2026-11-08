@@ -50,14 +50,41 @@ body{
 button,select,input{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* Every choice is a blank on the form, filled in pencil */
+select{
+  -webkit-appearance:none;appearance:none;cursor:pointer;max-width:100%;
+  font-family:"Kalam","Comic Sans MS",cursive;font-size:17px;line-height:1.3;color:var(--pencil);
+  border:0;border-bottom:1px solid var(--line);border-radius:0;padding:1px 20px 0 2px;
+  background-color:transparent;
+  background-image:linear-gradient(45deg,transparent 50%,var(--soft) 50%),linear-gradient(135deg,var(--soft) 50%,transparent 50%);
+  background-position:calc(100% - 10px) 55%,calc(100% - 5px) 55%;background-size:5px 5px;background-repeat:no-repeat;
+}
+select:hover{border-bottom-color:var(--ink)}
+select option,select optgroup{font-family:"Alegreya",Georgia,serif;background:var(--card);color:var(--ink)}
+/* Checkboxes and radios are the printed boxes, ticked in pencil */
+input[type=checkbox],input[type=radio]{
+  -webkit-appearance:none;appearance:none;margin:0;flex:none;cursor:pointer;position:relative;
+  width:15px;height:15px;border:1.3px solid var(--ink);border-radius:1px;background:var(--card);
+}
+input[type=radio]{border-radius:50%}
+input[type=checkbox]:checked::after{content:"";position:absolute;left:4px;top:-4px;width:6px;height:13px;border:solid var(--pencil);border-width:0 2.4px 2.4px 0;border-radius:0 0 2px 0;transform:rotate(38deg)}
+input[type=radio]:checked::after{content:"";position:absolute;inset:2.5px;border-radius:50%;background:var(--pencil)}
+
 .wrap{max-width:1240px;margin:0 auto;padding:28px 20px 60px}
-header{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
+header{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:flex-end;justify-content:space-between;margin-bottom:20px}
 h1{
   margin:0;font-weight:800;font-size:clamp(30px,4.4vw,46px);line-height:1.02;letter-spacing:-.01em;
 }
 h1 small{display:block;font-family:"Kalam",cursive;font-weight:400;font-size:.42em;color:var(--red);letter-spacing:0;transform:rotate(-1.2deg);transform-origin:left;margin-top:6px}
 
-.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.fileacts{display:flex;flex-wrap:wrap;gap:2px 20px;padding-bottom:4px}
+.link{
+  border:0;background:none;padding:2px 0;cursor:pointer;font-weight:600;font-size:15px;color:var(--ink);
+  text-decoration:underline;text-decoration-color:var(--line);text-decoration-thickness:1.5px;text-underline-offset:4px;
+}
+.link:hover{text-decoration-color:var(--ink)}
 .btn{
   border:1.5px solid var(--ink);background:var(--card);padding:7px 14px;border-radius:3px;cursor:pointer;
   font-weight:600;font-size:15px;
@@ -65,46 +92,80 @@ h1 small{display:block;font-family:"Kalam",cursive;font-weight:400;font-size:.42
 .btn:hover{background:var(--grid)}
 .btn.primary{background:var(--ink);color:var(--paper)}
 .btn.primary:hover{opacity:.88}
-.check{display:flex;gap:6px;align-items:center;font-size:15px;padding:0 6px;cursor:pointer}
+.check{display:flex;gap:7px;align-items:center;font-size:15px;cursor:pointer}
 
-.partycheck{
-  display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;
-  border-top:2px solid var(--ink);border-bottom:1px solid var(--line);
-  padding:8px 2px;margin-bottom:22px;font-size:15px;
+/* Party at a glance */
+.party{border-top:2px solid var(--ink);padding-top:12px;margin-bottom:24px}
+.roll{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,158px),1fr));gap:10px}
+.mini{
+  display:block;color:inherit;text-decoration:none;min-width:0;
+  background:var(--card);border:1px solid var(--line);border-radius:4px;padding:6px 10px 7px;
 }
+.mini:hover{border-color:var(--ink)}
+.mini .who{display:block;font:700 20px/1.15 "Kalam",cursive;color:var(--pencil);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mini .cl{display:block;font-size:14px;color:var(--soft);margin-bottom:3px}
+.mini .nums{display:flex;gap:4px 14px;flex-wrap:wrap}
+.mini .nums span{display:flex;flex-direction:column;line-height:1.1}
+.mini i{font-style:normal;font-size:12px;color:var(--soft)}
+.mini b{font:700 18px/1.2 "Kalam",cursive;color:var(--pencil);white-space:nowrap}
+.mini b.atk{color:var(--red)}
+.mini b.low{color:var(--red)}
+.mini b small{font-size:13px;font-weight:400;color:var(--soft)}
+.partycheck{display:flex;flex-wrap:wrap;gap:6px 20px;align-items:center;padding:10px 2px 0;font-size:15px}
 .partycheck strong{font-weight:800}
-.role{white-space:nowrap}
-.role .mark{font-family:"Kalam",cursive;font-weight:700;margin-right:3px}
-.role.yes .mark{color:var(--ok)} .role.no .mark{color:var(--warn)}
+.role{white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.role .box{width:15px;height:15px;border:1.3px solid var(--ink);border-radius:1px;background:var(--card);position:relative;flex:none}
+.role.yes .box::after{content:"";position:absolute;left:4px;top:-4px;width:6px;height:13px;border:solid var(--pencil);border-width:0 2.4px 2.4px 0;border-radius:0 0 2px 0;transform:rotate(38deg)}
 .role.no{color:var(--soft)}
+.role.no .box{border-color:var(--soft)}
+.role .hand{font-weight:700;font-size:18px}
 .warning{color:var(--warn);font-style:italic}
 
 .sheets{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:22px}
 .sheet{
-  background:var(--card);border:1.5px solid var(--ink);border-radius:2px;
-  padding:16px 18px 18px;position:relative;
-  box-shadow:4px 4px 0 var(--grid-strong);
+  background:var(--card);border:1.5px solid var(--ink);border-radius:6px;
+  padding:0 18px 18px;position:relative;scroll-margin-top:16px;
 }
-.sheet-head{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:end;border-bottom:1.5px solid var(--ink);padding-bottom:8px;margin-bottom:10px}
-.namebox{display:flex;align-items:baseline;gap:6px;min-width:0}
+/* Title band, as on the printed party sheet: printed class on ink, level beside it */
+.band{
+  display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;
+  margin:0 -18px 10px;padding:7px 10px 7px 16px;border-radius:4px 4px 0 0;
+  background:var(--ink);color:var(--card);
+}
+.band select{
+  font:600 19px/1.25 "Alegreya",Georgia,serif;color:var(--card);
+  border-bottom-color:color-mix(in srgb,var(--card) 40%,transparent);
+  background-image:linear-gradient(45deg,transparent 50%,var(--card) 50%),linear-gradient(135deg,var(--card) 50%,transparent 50%);
+}
+.band select:hover{border-bottom-color:var(--card)}
+.band .page{font-size:14px;font-style:italic;color:color-mix(in srgb,var(--card) 72%,transparent)}
+.band .sp{flex:1}
+.band .iconbtn,.band .step{background:transparent;color:var(--card);border-color:color-mix(in srgb,var(--card) 45%,transparent)}
+.band .iconbtn:hover{border-color:var(--card);color:var(--card)}
+.band .step .iconbtn{border-color:color-mix(in srgb,var(--card) 45%,transparent)}
+.band .lv{font-weight:800;font-size:15px;padding:0 8px}
+.band :focus-visible{outline-color:var(--card)}
+.namebox{display:flex;align-items:baseline;gap:10px;min-width:0;margin-bottom:6px}
 .namebox input{
-  font-family:"Kalam",cursive;font-size:26px;font-weight:700;color:var(--pencil);
-  border:none;background:transparent;width:100%;min-width:0;padding:0;
+  font-family:"Kalam",cursive;font-size:28px;font-weight:700;color:var(--pencil);
+  border:none;border-bottom:1px solid var(--line);background:transparent;width:100%;min-width:0;padding:0 2px;
 }
+.namebox input:hover{border-bottom-color:var(--ink)}
 .namebox input:focus-visible{outline-offset:4px}
-.lvl{font-weight:800;font-size:15px;white-space:nowrap}
-.classrow{grid-column:1/-1;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.classrow select{
-  font-weight:600;font-size:17px;border:none;border-bottom:1px dashed var(--line);background:transparent;padding:2px 2px;cursor:pointer;
-}
-.classrow select option{background:var(--card);color:var(--ink)}
-.page{font-size:14px;color:var(--soft);font-style:italic}
+.tier{font-size:14px;color:var(--soft);font-style:italic;margin:-2px 0 4px}
 .iconbtn{
-  border:1.2px solid var(--line);background:transparent;border-radius:3px;cursor:pointer;
-  padding:2px 7px;font-size:14px;color:var(--pencil);white-space:nowrap;flex-shrink:0;
+  border:1px solid var(--line);background:var(--card);border-radius:3px;cursor:pointer;
+  padding:2px 8px;font-size:14px;line-height:1.35;color:var(--ink);white-space:nowrap;flex-shrink:0;
 }
-.iconbtn:disabled{opacity:.45;cursor:not-allowed}
-.iconbtn:hover{border-color:var(--ink);color:var(--ink)}
+.iconbtn:disabled{opacity:.4;cursor:not-allowed}
+.iconbtn:not(:disabled):hover{border-color:var(--ink)}
+/* Steppers: − value + joined into one box */
+.step{display:inline-flex;align-items:stretch;border:1px solid var(--line);border-radius:3px;background:var(--card);white-space:nowrap}
+.step .iconbtn{border:0;border-radius:0;background:transparent;padding:1px 9px;font-size:16px;line-height:1.2}
+.step .iconbtn:first-child{border-right:1px solid var(--line)}
+.step .iconbtn:last-child{border-left:1px solid var(--line)}
+.step .iconbtn:not(:disabled):hover{background:var(--grid)}
+.band .step .iconbtn:not(:disabled):hover{background:color-mix(in srgb,var(--card) 18%,transparent)}
 
 .stats{display:grid;grid-template-columns:repeat(5,1fr);border:1.2px solid var(--ink);margin:4px 0 12px}
 .stat{padding:5px 6px 6px;border-right:1px solid var(--line);min-width:0}
@@ -135,15 +196,12 @@ h1 small{display:block;font-family:"Kalam",cursive;font-weight:400;font-size:.42
 .total{font-family:"Kalam",cursive;font-weight:700;font-size:20px;color:var(--red)}
 
 .traitpick{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:2px}
-.traitpick select{border:none;border-bottom:1px dashed var(--line);background:transparent;font-size:15px;font-weight:600;max-width:100%;cursor:pointer}
-.traitpick select option{background:var(--card);color:var(--ink)}
 .traittext{font-size:15px;margin:0 0 4px;color:var(--ink)}
 .traittext em{color:var(--soft)}
 
 ul.feat{margin:2px 0 0;padding-left:18px;font-size:15px}
 ul.feat li{margin:1px 0}
 .slots{display:flex;flex-wrap:wrap;gap:6px 10px;margin-top:3px}
-.slots select{font-family:"Kalam",cursive;font-size:16px;color:var(--pencil);border:1px solid var(--line);border-radius:3px;background:var(--card);padding:1px 4px;cursor:pointer}
 .limits{margin-top:10px;font-size:14px;color:var(--soft);border-top:1px dashed var(--line);padding-top:6px}
 .limits b{color:var(--pencil);font-weight:600}
 .notes{width:100%;margin-top:6px;border:1px dashed var(--line);background:transparent;font-family:"Kalam",cursive;font-size:16px;color:var(--pencil);padding:4px 6px;min-height:2.2em;resize:vertical}
@@ -159,16 +217,14 @@ ul.feat li{margin:1px 0}
 footer{margin-top:28px;font-size:13px;color:var(--soft)}
 
 
-.settings{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;font-size:15px;margin:-8px 0 14px}
-.settings select{border:1px solid var(--line);background:var(--card);border-radius:3px;padding:2px 6px;font-weight:600;cursor:pointer}
+.settings{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;font-size:15px;margin:0 0 14px}
+.settings .field{display:flex;gap:8px;align-items:baseline}
+.settings .counter .hand{font-weight:700;font-size:18px}
 .settings .counter{display:flex;gap:6px;align-items:center}
-.settings .help{color:var(--soft);font-style:italic}
-.lvlctl{display:flex;align-items:center;gap:4px;white-space:nowrap}
-.lvlctl .lv{font-weight:800;font-size:15px}
-.lvlctl .tier{font-size:13px;color:var(--soft);font-style:italic}
-.track{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;font-size:15px;margin:-4px 0 6px}
-.track .ctr{display:flex;align-items:center;gap:4px;white-space:nowrap}
-.track .val{font-family:"Kalam",cursive;font-weight:700;font-size:19px;color:var(--pencil);min-width:1.6em;text-align:center}
+.settings .help{flex-basis:100%;color:var(--soft);font-style:italic;margin-top:-4px}
+.track{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:15px;margin:0 0 6px}
+.track .ctr{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.track .val{font-family:"Kalam",cursive;font-weight:700;font-size:19px;line-height:1.25;color:var(--pencil);min-width:2em;text-align:center}
 .track .val.low{color:var(--red)}
 .track .of{color:var(--soft);font-size:14px}
 .track .note{flex-basis:100%;font-size:13px;font-style:italic;color:var(--soft);margin-top:-2px}
@@ -193,7 +249,7 @@ details.shop[open] summary{border-bottom:1px solid var(--line)}
 .chip button{border:none;background:transparent;cursor:pointer;color:var(--soft);font-size:14px;padding:0 4px}
 .chip button:hover{color:var(--red)}
 .pet{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:center;font-size:15px;margin-top:3px}
-.pet select{border:1px solid var(--line);background:var(--card);border-radius:3px;padding:1px 4px;cursor:pointer;max-width:100%}
+.pet select{justify-self:start;min-width:12em}
 .petstat{grid-column:1/-1;font-size:14px;color:var(--pencil)}
 .petstat b{font-family:"Kalam",cursive;color:var(--red)}
 
@@ -262,20 +318,20 @@ details.shop[open] summary{border-bottom:1px solid var(--line)}
 <div class="wrap">
   <header>
     <h1>Four Against Darkness<small>party builder</small></h1>
-    <div class="toolbar">
-      <button class="btn primary" id="rollParty">Roll a new party</button>
-      <label class="check"><input type="checkbox" id="coreOnly"> Core classes only</label>
-      <button class="btn" id="saveParty">Save party</button>
-      <button class="btn" id="copyMd">Copy as Markdown</button>
-      <button class="btn" id="exportJson">Export JSON</button>
-      <button class="btn" id="importJson">Import JSON</button>
+    <nav class="fileacts" aria-label="Save, share and print">
+      <button class="link" id="saveParty">Save party</button>
+      <button class="link" id="copyMd">Copy as Markdown</button>
+      <button class="link" id="exportJson">Export JSON</button>
+      <button class="link" id="importJson">Import JSON</button>
       <input type="file" id="importFile" accept=".json,application/json" hidden>
-      <button class="btn" id="printBtn">Print</button>
-    </div>
+      <button class="link" id="printBtn">Print</button>
+    </nav>
   </header>
 
   <div class="settings" id="settings">
-    <label>Advancement <select id="xpSystem" aria-label="XP system">
+    <button class="btn primary" id="rollParty">Roll a new party</button>
+    <label class="check"><input type="checkbox" id="coreOnly"> Core classes only</label>
+    <label class="field">Advancement <select id="xpSystem" aria-label="XP system">
       <option value="classical">Classical XP rolls (default)</option>
       <option value="slowsure">Slow and sure</option>
       <option value="oldschool">Old school XP tally</option>
@@ -285,7 +341,10 @@ details.shop[open] summary{border-bottom:1px solid var(--line)}
     <span class="counter" id="encCounter"></span>
     <span class="help" id="xpHelp"></span>
   </div>
-  <div class="partycheck" id="partyCheck" aria-live="polite"></div>
+  <section class="party" aria-label="Party at a glance">
+    <div class="roll" id="partyRoll"></div>
+    <div class="partycheck" id="partyCheck" aria-live="polite"></div>
+  </section>
   <main class="sheets" id="sheets"></main>
 
   <section class="roster">
@@ -727,7 +786,7 @@ function trackHTML(h,i){
   if(h.madness>lim) notes.push(`<span class="warning">Madness above ${lim}: insane — runs off and is never seen again.</span>`);
   else if(h.madness>0) notes.push(`Paranoid: can’t exchange equipment with allies. Insane above ${lim} Madness.`);
   if(h.clues>=3) notes.push("3 Clues: can reveal a Secret.");
-  const ctr=(lbl,act,val,extra,cls)=>`<span class="ctr">${lbl} <button class="iconbtn" data-act="${act}down" data-i="${i}" aria-label="Lower ${lbl}"${val<=0?" disabled":""}>−</button><span class="val${cls?" "+cls:""}" aria-label="${lbl} ${val}">${val}</span><button class="iconbtn" data-act="${act}up" data-i="${i}" aria-label="Raise ${lbl}"${extra||""}>+</button></span>`;
+  const ctr=(lbl,act,val,extra,cls)=>`<span class="ctr">${lbl} <span class="step"><button class="iconbtn" data-act="${act}down" data-i="${i}" aria-label="Lower ${lbl}"${val<=0?" disabled":""}>−</button><span class="val${cls?" "+cls:""}" aria-label="${lbl} ${val}">${val}</span><button class="iconbtn" data-act="${act}up" data-i="${i}" aria-label="Raise ${lbl}"${extra||""}>+</button></span></span>`;
   return `<div class="track" aria-label="Play tracking">
     ${ctr("Life","hp",cur,cur>=max?" disabled":"",cur<max?"low":"")}<span class="of">of ${max}</span>${cur<max?`<button class="iconbtn" data-act="hpfull" data-i="${i}">Full</button>`:""}
     ${ctr("Madness","mad",h.madness,"",h.madness>0?"low":"")}
@@ -764,17 +823,17 @@ function sheetHTML(h, idx, anim){
   const foodDice = h.food ? ` <span class="aside">rations:</span> <span class="dice">${h.food.map(v=>die(v,anim)).join("")}</span>` : "";
   const T=k.T;
   const lifeNote = `${c.life}+L${(k.life!==c.life+h.L)?" +trait":""}`;
-  const tierNote = T>1 ? ` <span class="tier">${TIER_NAME[T]} Tier — ${k.die}, explodes on ${({8:7,10:8,12:9,20:10})[TIER_DIE[T]]}+</span>` : ` <span class="tier">Basic Tier</span>`;
-  return `<article class="sheet" aria-label="Hero ${idx+1}">
-    <div class="sheet-head">
-      <div class="namebox"><input value="${esc(h.name)}" data-act="name" data-i="${idx}" aria-label="Hero name"><button class="iconbtn" data-act="rename" data-i="${idx}">New name</button></div>
-      <span class="lvlctl"><button class="iconbtn" data-act="lvdown" data-i="${idx}" aria-label="Lower level"${h.L<=1?" disabled":""}>−</button><span class="lv">Level ${h.L}</span><button class="iconbtn" data-act="lvup" data-i="${idx}" aria-label="Raise level"${h.L>=20?" disabled":""}>+</button></span>
-      <div class="classrow">
-        <select data-act="cls" data-i="${idx}" aria-label="Class">${classOpts}</select>
-        <button class="iconbtn" data-act="reroll" data-i="${idx}">Reroll hero</button>
-        <span class="page">p. ${c.page}${c.rare?", rare":""}</span>${tierNote}
-      </div>
+  const tierNote = T>1 ? `${TIER_NAME[T]} Tier: Tier die ${k.die}, explodes on ${({8:7,10:8,12:9,20:10})[TIER_DIE[T]]}+` : `Basic Tier`;
+  return `<article class="sheet" id="hero-${idx}" aria-label="Hero ${idx+1}: ${esc(h.name)}">
+    <div class="band">
+      <select data-act="cls" data-i="${idx}" aria-label="Class">${classOpts}</select>
+      <span class="page">p. ${c.page}${c.rare?", rare":""}</span>
+      <span class="sp"></span>
+      <button class="iconbtn" data-act="reroll" data-i="${idx}">Reroll hero</button>
+      <span class="step"><button class="iconbtn" data-act="lvdown" data-i="${idx}" aria-label="Lower level"${h.L<=1?" disabled":""}>−</button><span class="lv">Level ${h.L}</span><button class="iconbtn" data-act="lvup" data-i="${idx}" aria-label="Raise level"${h.L>=20?" disabled":""}>+</button></span>
     </div>
+    <div class="namebox"><input value="${esc(h.name)}" data-act="name" data-i="${idx}" aria-label="Hero name"><button class="iconbtn" data-act="rename" data-i="${idx}">New name</button></div>
+    <p class="tier">${tierNote}</p>
     <div class="stats">
       <div class="stat"><span class="k">Life</span><span class="v">${k.life}</span><span class="n">${lifeNote}</span></div>
       <div class="stat"><span class="k">Attack</span><span class="v">${diceStr(k.die,k.weapons[0].b)}</span><span class="n">${esc(k.weapons[0].n)}</span></div>
@@ -813,13 +872,16 @@ const ROLES = [
 ];
 function renderCheck(){
   const ids=party.map(h=>h.cls);
-  const roles = ROLES.map(r=>{const yes=ids.some(i=>r.ids.includes(i));return `<span class="role ${yes?"yes":"no"}"><span class="mark">${yes?"✓":"✗"}</span>${r.n}</span>`}).join("");
+  const roles = ROLES.map(r=>{const yes=ids.some(i=>r.ids.includes(i));return `<span class="role ${yes?"yes":"no"}"><span class="box" aria-hidden="true"></span>${r.n}<span class="sr">${yes?": covered":": missing"}</span></span>`}).join("");
+  document.getElementById("partyRoll").innerHTML = party.map((h,i)=>{ const k=computed(h), max=maxLife(h), cur=curLife(h);
+    return `<a class="mini" href="#hero-${i}"><span class="who">${esc(h.name)}</span><span class="cl">${byId[h.cls].name}, level ${h.L}</span>
+      <span class="nums"><span><i>Life</i><b class="${cur<max?"low":""}">${cur}<small>/${max}</small></b></span><span><i>Attack</i><b class="atk">${diceStr(k.die,k.weapons[0].b)}</b></span><span><i>Defense</i><b>${diceStr(k.die,k.defense)}</b></span></span></a>`; }).join("");
   const warns=[];
   for(const c of CLASSES.filter(c=>c.rare)) if(ids.filter(i=>i===c.id).length>1) warns.push(`Only one ${c.name.toLowerCase()} allowed per party.`);
   if(ids.filter(i=>i==="dwarf").length>=2) warns.push("Two or more dwarves: the party can’t Bribe.");
   const hcl = Math.max(...party.map(h=>h.L));
   const gold = party.reduce((s,h)=>s+goldLeft(h),0);
-  document.getElementById("partyCheck").innerHTML = `<strong>Party mix</strong>${roles}<span class="role">HCL <span class="hand" style="font-weight:700">${hcl}</span></span><span class="role">Gold left: <span class="hand" style="color:var(--red);font-weight:700">${gold} gp</span></span>${warns.map(w=>`<span class="warning">${w}</span>`).join("")}`;
+  document.getElementById("partyCheck").innerHTML = `<strong>Party mix</strong>${roles}<span class="role">HCL <span class="hand">${hcl}</span></span><span class="role">Gold left <span class="hand" style="color:var(--red)">${gold} gp</span></span>${warns.map(w=>`<span class="warning">${w}</span>`).join("")}`;
 }
 function renderSettings(){
   document.getElementById("xpSystem").value=meta.xp;
@@ -827,7 +889,7 @@ function renderSettings(){
   document.getElementById("xpHelp").textContent=XP_HELP[meta.xp];
   const enc=document.getElementById("encCounter");
   if(meta.xp==="classical"||meta.xp==="slower"){
-    enc.innerHTML=`Minor Foe encounters <span class="hand" style="font-weight:700">${meta.minor}/10</span> <button class="iconbtn" id="encPlus">+1 encounter</button>${meta.xp==="classical"&&meta.banked?` <span class="warning">${meta.banked} XP roll${meta.banked>1?"s":""} to assign</span>`:""}`;
+    enc.innerHTML=`Minor Foe encounters <span class="hand">${meta.minor}/10</span> <button class="iconbtn" id="encPlus">+1 encounter</button>${meta.xp==="classical"&&meta.banked?` <span class="warning">${meta.banked} XP roll${meta.banked>1?"s":""} to assign</span>`:""}`;
   } else enc.innerHTML="";
 }
 let openShops=new Set();
@@ -1104,7 +1166,7 @@ sheetsEl.addEventListener("change",e=>{
 });
 sheetsEl.addEventListener("input",e=>{
   const t=e.target, a=t.dataset.act; if(a!=="name"&&a!=="notes") return;
-  party[+t.dataset.i][a]=t.value; save();
+  party[+t.dataset.i][a]=t.value; save(); if(a==="name") renderCheck();
 });
 sheetsEl.addEventListener("toggle",e=>{ const dt=e.target; if(dt.matches&&dt.matches("details.shop")){ const i=+dt.dataset.i; dt.open?openShops.add(i):openShops.delete(i);} },true);
 
