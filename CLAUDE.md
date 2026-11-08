@@ -68,8 +68,9 @@ Graph-paper "printed form filled in pencil" look.
 - GitHub Pages from `main` at https://4ad.macondo.info/ (`CNAME` file; DNS CNAME `4ad` → `juancasa.github.io` at domain.com). Don’t delete `CNAME`. Pushing to `main` deploys.
 
 ## Testing
-- `python3 tests/smoke.py` runs a Playwright smoke test: it cycles every class through levels, buys gear, adds companions, uses each XP system and toggles free equipment, failing on any page error.
-- Setup: `pip install playwright && playwright install chromium`.
+- **All Python runs through pipenv** (`pipenv run …`), never bare `python3`/`pip`. Dependencies live in `Pipfile` / `Pipfile.lock`; the virtualenv is `.venv/` in the project (gitignored). Add packages with `pipenv install [--dev] <pkg>`.
+- `pipenv run python tests/smoke.py` runs a Playwright smoke test: it cycles every class through levels, buys gear, adds companions, uses each XP system and toggles free equipment, failing on any page error.
+- Setup: `PIPENV_VENV_IN_PROJECT=1 pipenv install --dev && pipenv run playwright install chromium`.
 - Run it after every change, and open `index.html` in a browser for a visual check.
 
 ## Conventions

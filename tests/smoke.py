@@ -1,4 +1,4 @@
-"""Smoke test for index.html. Run: python3 tests/smoke.py"""
+"""Smoke test for index.html. Run: pipenv run python tests/smoke.py"""
 import json, pathlib, sys
 from playwright.sync_api import sync_playwright
 
